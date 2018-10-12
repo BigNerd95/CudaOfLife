@@ -12,7 +12,7 @@ GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
 Algo:
 - dimensione righe multipla di 2 per poter usare and al posto del modulo
 
-gcc sequenziale.c -o sequenziale -D_REENTRANT -lSDL2 && ./sequenziale
+gcc omp.c -o omp -D_REENTRANT -lSDL2 -fopenmp && time ./omp
 */
 
 #define WIDTH 640
@@ -166,7 +166,27 @@ unsigned char countAliveCells(unsigned char *matrix, size_t x0, size_t x1, size_
          + matrix[x2 + y1] + matrix[x0 + y2] + matrix[x1 + y2] + matrix[x2 + y2];
 }
 
+void compute_generation_singlefor(GenState_p s1, GenState_p s2){
+    size_t dim = s1->rows * s1->cols;
+    #pragma omp parallel for
+    for (size_t i = 0; i < dim; i++) {
+
+        size_t x1 = i % s1->cols;
+        size_t x0 = (x1 - 1) % s1->cols;
+        size_t x2 = (x1 + 1) % s1->cols;
+
+        size_t y1 = i - x1;
+        size_t y0 = (y1 - s1->cols) % dim;
+        size_t y2 = (y1 + s1->cols) % dim;
+
+        unsigned char aliveCells = countAliveCells(s1->matrix, x0, x1, x2, y0, y1, y2);
+        s2->matrix[y1 + x1] = (aliveCells == 3 || (aliveCells == 2 && s1->matrix[y1 + x1])) ? 1 : 0;
+        
+    }
+}
+
 void compute_generation(GenState_p s1, GenState_p s2){
+    #pragma omp parallel for
     for (size_t y = 0; y < s1->rows; y++) {
         size_t y0 = ((y - 1) % s1->rows) * s1->cols;
         size_t y1 = y * s1->cols;
@@ -187,22 +207,22 @@ void game(int rows, int cols){
     GenState_p s2 = create_gen(rows, cols);
     random_gen(s1);
 
-    display_gen(s1);
-    SDL_Delay(DELAY);
+    //display_gen(s1);
+    //SDL_Delay(DELAY);
 
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 100000; i++) {
 
         compute_generation(s1, s2);
 
         swap((void **) &s1, (void **) &s2);
         display_gen(s1);
-        SDL_Delay(DELAY);
+        //SDL_Delay(DELAY);
     }
     
 }
 
 int main(int argc, char *argv[]) {
-    init_gui();
+    //init_gui();
 
     srand((unsigned) time(0));
 
@@ -212,6 +232,7 @@ int main(int argc, char *argv[]) {
 
     //SDL_Delay(5000);
     //getchar();
-    quit_gui();
+
+    //quit_gui();
     return 0;
 }
