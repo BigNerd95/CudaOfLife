@@ -1,19 +1,20 @@
-#include <SDL2/SDL.h>
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h> 
+#include <sys/time.h>   
+#include <sys/resource.h> 
+#include <string.h>
 
 
 /*
 GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
 - usa un solo rederer (non lo distrugge ogni volta)
-- usa un solo rettangolo, lo riposiziona per colorare i pixel
-- lasciamo sia righe che colonne nella matrice per genericità
+- usa un solo rettangolo, lo riposiziona per colorare i pizel
 
 Algo:
 - dimensione righe multipla di 2 per poter usare and al posto del modulo
-
-gcc sequenziale.c -o sequenziale -D_REENTRANT -lSDL2 && ./sequenziale
 */
 
 #define WIDTH 640
@@ -26,69 +27,6 @@ typedef struct {
     unsigned int cols;
 } GenState, *GenState_p;
 
-SDL_Window *window;
-SDL_Renderer *renderer;
-int done;
-
-void color(int x, int y){
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-    SDL_Rect rect = { x, y, 100, 100};
-    SDL_RenderFillRect(renderer, &rect);
-
-    rect.x = x + 200;
-    SDL_RenderFillRect(renderer, &rect);
-
-    SDL_UpdateWindowSurface(window);
-}
-
-void clear_all(){
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-    SDL_UpdateWindowSurface(window);
-}
-
-void mia(){
-
-    clear_all();
-    SDL_Delay(2000);
-
-    color(0,0);
-    SDL_Delay(2000);
-
-    clear_all();
-    SDL_Delay(2000);
-
-    color(100,100);
-    SDL_Delay(2000);
-}
-
-void init_gui() {
-    SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-
-    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init fail : %s\n", SDL_GetError());
-        exit(1);
-    }
-
-    window = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE);
-    if(!window) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Window creation fail : %s\n",SDL_GetError());
-        exit(1);
-    }
-
-    renderer = SDL_CreateSoftwareRenderer(SDL_GetWindowSurface(window));
-    if(!renderer) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Render creation for surface fail : %s\n",SDL_GetError());
-        exit(1);
-    }
-}
-
-void quit_gui(){
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-}
 
 void print_gen(GenState gen){
     printf("r: %d c: %d\n", gen.rows, gen.cols);
@@ -99,28 +37,6 @@ void print_gen(GenState gen){
         }
         printf("\n");
     }
-}
-
-void display_gen(GenState_p gen){
-    clear_all();
-
-    SDL_Rect darea;
-    SDL_RenderGetViewport(renderer, &darea);
-    SDL_Rect rect = {0, 0, darea.w/gen->cols, darea.h/gen->rows};
-    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-    for (int r = 0; r < gen->rows; r++){
-        for (int c=0; c < gen->cols; c++){
-            if (gen->matrix[r * gen->cols + c]){
-                rect.y = r * rect.h; 
-                rect.x = c * rect.w;
-                SDL_RenderFillRect(renderer, &rect);
-            }
-        }
-    }
-
-    SDL_UpdateWindowSurface(window);
 }
 
 GenState_p create_gen(int rows, int cols){
@@ -143,16 +59,6 @@ void clear_gen(GenState_p gen){
 void random_gen(GenState_p gen){
     for (int i=0; i < gen->cols * gen->rows; i++){
         gen->matrix[i] = rand() % 2;
-    }
-}
-
-void simple(){
-    GenState_p gen = create_gen(10, 10);
-    for (int x=0; x<5; x++){
-        random_gen(gen);
-        //print_gen(gen);
-        display_gen(gen);
-        SDL_Delay(1000);
     }
 }
 
@@ -183,36 +89,61 @@ void compute_generation(GenState_p s1, GenState_p s2){
     }
 }
 
-void game(int rows, int cols){
+double get_execution_time(int rows, int cols, int iterations){
+    struct timespec start, finish; 
     GenState_p s1 = create_gen(rows, cols);
     GenState_p s2 = create_gen(rows, cols);
     random_gen(s1);
 
-    display_gen(s1);
-    SDL_Delay(DELAY);
-
-    for (int i = 0; i < 500; i++) {
-
-        compute_generation(s1, s2);
-
-        swap((void **) &s1, (void **) &s2);
-        display_gen(s1);
-        SDL_Delay(DELAY);
-    }
+    clock_gettime(CLOCK_REALTIME, &start); 
     
+    for (int i = 0; i < iterations; i++) {
+        compute_generation(s1, s2);
+        swap((void *) &s1, (void *) &s2);
+    }
+    clock_gettime(CLOCK_REALTIME, &finish);
+    double seconds = (double)(finish.tv_sec - start.tv_sec); 
+    double ns = (double)(finish.tv_nsec - start.tv_nsec); 
+         
+    if (start.tv_nsec > finish.tv_nsec) { // clock underflow 
+	    --seconds; 
+	    ns += 1000000000; 
+    } 
+    double total_time = seconds + ns/1000000000.0; 
+    free_gen(s1);
+    free_gen(s2);
+    return total_time;
+}
+
+int get_iterations_per_second(int rows, int cols, int timer_seconds){
+    int msec = 0, trigger = timer_seconds * 1000; /* trigger is in ms */
+    clock_t before = clock();
+    GenState_p s1 = create_gen(rows, cols);
+    GenState_p s2 = create_gen(rows, cols);
+    random_gen(s1);
+    long int iterations = 0;
+
+    do {
+        compute_generation(s1, s2);
+        swap((void *) &s1, (void *) &s2);
+
+        clock_t difference = clock() - before;
+        msec = difference * 1000 / CLOCKS_PER_SEC;
+        iterations++;
+    } while ( msec < trigger );
+
+    printf("For size %d Time taken %d seconds %d milliseconds (%ld iterations)\n", rows, msec/1000, msec%1000, iterations);
+    free_gen(s1);
+    free_gen(s2);
 }
 
 int main(int argc, char *argv[]) {
-    init_gui();
-
     srand((unsigned) time(0));
-
-    //mia();
-    //simple();
-    game(128, 128);
-
-    //SDL_Delay(5000);
-    //getchar();
-    quit_gui();
+    int word_size = 32;
+    for (int i = 1; i < 8; i++){        
+        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000));
+        //get_iterations_per_second(word_size, word_size, 1);
+        word_size  *= 2;
+    }
     return 0;
 }
