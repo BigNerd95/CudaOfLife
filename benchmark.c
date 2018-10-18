@@ -13,6 +13,8 @@ GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
 - usa un solo rederer (non lo distrugge ogni volta)
 - usa un solo rettangolo, lo riposiziona per colorare i pizel
 
+gcc unit_test.c -o unit_test -I/usr/include/SDL2 -D_REENTRANT -lSDL2 | ./unit_test
+
 Algo:
 - dimensione righe multipla di 2 per poter usare and al posto del modulo
 */
@@ -89,6 +91,63 @@ void compute_generation(GenState_p s1, GenState_p s2){
     }
 }
 
+void compute_generation_singlefor(GenState_p s1, GenState_p s2){
+    size_t dim = s1->rows * s1->cols;
+    #pragma omp parallel for
+    for (size_t i = 0; i < dim; i++) {
+
+        size_t x1 = i % s1->cols;
+        size_t x0 = (x1 - 1) % s1->cols;
+        size_t x2 = (x1 + 1) % s1->cols;
+
+        size_t y1 = i - x1;
+        size_t y0 = (y1 - s1->cols) % dim;
+        size_t y2 = (y1 + s1->cols) % dim;
+
+        unsigned char aliveCells = countAliveCells(s1->matrix, x0, x1, x2, y0, y1, y2);
+        s2->matrix[y1 + x1] = (aliveCells == 3 || (aliveCells == 2 && s1->matrix[y1 + x1])) ? 1 : 0;
+        
+    }
+}
+
+void compute_generation_doublefor(GenState_p s1, GenState_p s2){
+    #pragma omp parallel for
+    for (size_t y = 0; y < s1->rows; y++) {
+        size_t y0 = ((y - 1) % s1->rows) * s1->cols;
+        size_t y1 = y * s1->cols;
+        size_t y2 = ((y + 1) % s1->rows) * s1->cols;
+
+        for (size_t x = 0; x < s1->cols; x++) {
+            size_t x0 = (x - 1) % s1->cols;
+            size_t x2 = (x + 1) % s1->cols;
+
+            unsigned char aliveCells = countAliveCells(s1->matrix, x0, x, x2, y0, y1, y2);
+            s2->matrix[y1 + x] = (aliveCells == 3 || (aliveCells == 2 && s1->matrix[x + y1])) ? 1 : 0;
+        }
+    }
+}
+
+int get_iterations_per_second(int rows, int cols, int timer_seconds, void (*compute_generation)(GenState_p s1, GenState_p s2)){
+    int msec = 0, trigger = timer_seconds * 1000; /* trigger is in ms */
+    clock_t before = clock();
+    GenState_p s1 = create_gen(rows, cols);
+    GenState_p s2 = create_gen(rows, cols);
+    random_gen(s1);
+    long int iterations = 0;
+
+    do {
+        (*compute_generation)(s1, s2);
+        swap((void *) &s1, (void *) &s2);
+        iterations++;
+        clock_t difference = clock() - before; //quanti cicli di clock sono passati
+        msec = difference * 1000 / CLOCKS_PER_SEC; //converto i cicli di clock in millisecondi
+    } while ( msec < trigger );
+
+    printf("For size %d Time taken %d seconds %d milliseconds (%ld iterations)\n", rows, msec/1000, msec%1000, iterations);
+    free_gen(s1);
+    free_gen(s2);
+}
+
 double get_execution_time(int rows, int cols, int iterations){
     struct timespec start, finish; 
     GenState_p s1 = create_gen(rows, cols);
@@ -98,7 +157,7 @@ double get_execution_time(int rows, int cols, int iterations){
     clock_gettime(CLOCK_REALTIME, &start); 
     
     for (int i = 0; i < iterations; i++) {
-        compute_generation(s1, s2);
+        compute_generation_doublefor(s1, s2);
         swap((void *) &s1, (void *) &s2);
     }
     clock_gettime(CLOCK_REALTIME, &finish);
@@ -115,35 +174,23 @@ double get_execution_time(int rows, int cols, int iterations){
     return total_time;
 }
 
-int get_iterations_per_second(int rows, int cols, int timer_seconds){
-    int msec = 0, trigger = timer_seconds * 1000; /* trigger is in ms */
-    clock_t before = clock();
-    GenState_p s1 = create_gen(rows, cols);
-    GenState_p s2 = create_gen(rows, cols);
-    random_gen(s1);
-    long int iterations = 0;
-
-    do {
-        compute_generation(s1, s2);
-        swap((void *) &s1, (void *) &s2);
-
-        clock_t difference = clock() - before;
-        msec = difference * 1000 / CLOCKS_PER_SEC;
-        iterations++;
-    } while ( msec < trigger );
-
-    printf("For size %d Time taken %d seconds %d milliseconds (%ld iterations)\n", rows, msec/1000, msec%1000, iterations);
-    free_gen(s1);
-    free_gen(s2);
-}
 
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
-    int word_size = 32;
-    for (int i = 1; i < 8; i++){        
-        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000));
-        //get_iterations_per_second(word_size, word_size, 1);
-        word_size  *= 2;
-    }
+    int word_size = 128;
+    get_iterations_per_second(word_size, word_size, 3, (&compute_generation));
+    get_iterations_per_second(word_size, word_size, 3, (&compute_generation_doublefor));
+    get_iterations_per_second(word_size, word_size, 3, (&compute_generation_singlefor));
+
+    //for (int i = 1; i < 8; i++){        
+        //printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000));
+        //printf("\n Cpu seriale\n");
+        //get_iterations_per_second(word_size, word_size, 3, (&compute_generation));
+        //printf("\n OpenMp single for\n");
+        //get_iterations_per_second(word_size, word_size, 3, (&compute_generation_singlefor));
+        //printf("\n OpenMp double for\n");
+        //get_iterations_per_second(word_size, word_size, 3, (&compute_generation_doublefor));
+     //   word_size  *= 2;
+   // }
     return 0;
 }
