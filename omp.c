@@ -12,7 +12,7 @@ GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
 Algo:
 - dimensione righe multipla di 2 per poter usare and al posto del modulo
 
-gcc omp.c -o omp -D_REENTRANT -lSDL2 -fopenmp && time ./omp
+gcc omp.c -o omp -O2 -D_REENTRANT -lSDL2 -fopenmp && time ./omp
 */
 
 #define WIDTH 640
@@ -210,15 +210,60 @@ void game(int rows, int cols){
     //display_gen(s1);
     //SDL_Delay(DELAY);
 
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 1000; i++) {
 
         compute_generation(s1, s2);
 
         swap((void **) &s1, (void **) &s2);
-        display_gen(s1);
+        //display_gen(s1);
         //SDL_Delay(DELAY);
     }
     
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+void compute_generation_pow2(GenState_p s1, GenState_p s2){
+    unsigned int rows_m1 = s1->rows - 1;
+    unsigned int cols_m1 = s1->cols - 1;
+
+    #pragma omp parallel for
+    for (size_t y = 0; y < s1->rows; y++) {
+        size_t y0 = ((y - 1) & rows_m1) * s1->cols;
+        size_t y1 = y                   * s1->cols;
+        size_t y2 = ((y + 1) & rows_m1) * s1->cols;
+
+        for (size_t x = 0; x < s1->cols; x++) {
+            size_t x0 = (x - 1) & cols_m1;
+            size_t x2 = (x + 1) & cols_m1;
+
+            unsigned char aliveCells = countAliveCells(s1->matrix, x0, x, x2, y0, y1, y2);
+            s2->matrix[y1 + x] = (aliveCells == 3 || (aliveCells == 2 && s1->matrix[x + y1])) ? 1 : 0;
+        }
+    }
+}
+
+int isPow2(unsigned int x) {
+    return (x != 0) && ((x & (x - 1)) == 0);
+}
+
+void game_pow2(int rows, int cols){
+    if (isPow2(rows) && isPow2(cols)){
+        GenState_p s1 = create_gen(rows, cols);
+        GenState_p s2 = create_gen(rows, cols);
+        random_gen(s1);
+
+        for (int i = 0; i < 1000; i++) {
+
+            compute_generation_pow2(s1, s2);
+
+            swap((void **) &s1, (void **) &s2);
+        }
+    } else {
+        puts("Rows or Cols are not a power of 2!");
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -228,7 +273,8 @@ int main(int argc, char *argv[]) {
 
     //mia();
     //simple();
-    game(128, 128);
+    //game(1024, 1024);
+    game_pow2(1024, 1024);
 
     //SDL_Delay(5000);
     //getchar();

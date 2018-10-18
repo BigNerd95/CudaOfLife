@@ -12,7 +12,7 @@ GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
 Algo:
 - dimensione righe multipla di 2 per poter usare and al posto del modulo
 
-gcc sequenziale.c -o sequenziale -D_REENTRANT -lSDL2 && ./sequenziale
+gcc sequenziale.c -o sequenziale -O2 -D_REENTRANT -lSDL2 && ./sequenziale
 */
 
 #define WIDTH 640
@@ -187,31 +187,84 @@ void game(int rows, int cols){
     GenState_p s2 = create_gen(rows, cols);
     random_gen(s1);
 
-    display_gen(s1);
-    SDL_Delay(DELAY);
+    //display_gen(s1);
+    //SDL_Delay(DELAY);
 
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 1000; i++) {
 
         compute_generation(s1, s2);
 
         swap((void **) &s1, (void **) &s2);
-        display_gen(s1);
-        SDL_Delay(DELAY);
+        //display_gen(s1);
+        //SDL_Delay(DELAY);
     }
-    
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+unsigned int log2pow2(unsigned int x){
+    unsigned int pow2 = 0;
+    while (x >>= 1){
+        pow2++;
+    }
+    return pow2;
+}
+
+void compute_generation_pow2(GenState_p s1, GenState_p s2){
+    unsigned int rows_m1 = s1->rows - 1;
+    unsigned int cols_m1 = s1->cols - 1;
+    //unsigned int cols_log2 = log2pow2(s1->cols);
+
+    for (size_t y = 0; y < s1->rows; y++) {
+        size_t y0 = ((y - 1) & rows_m1) * s1->cols;//<< cols_log2;
+        size_t y1 = y                   * s1->cols;//<< cols_log2;
+        size_t y2 = ((y + 1) & rows_m1) * s1->cols;//<< cols_log2;
+
+        for (size_t x = 0; x < s1->cols; x++) {
+            size_t x0 = (x - 1) & cols_m1;
+            size_t x2 = (x + 1) & cols_m1;
+
+            unsigned char aliveCells = countAliveCells(s1->matrix, x0, x, x2, y0, y1, y2);
+            s2->matrix[y1 + x] = (aliveCells == 3 || (aliveCells == 2 && s1->matrix[x + y1])) ? 1 : 0;
+        }
+    }
+}
+
+int isPow2(unsigned int x) {
+    return (x != 0) && ((x & (x - 1)) == 0);
+}
+
+void game_pow2(int rows, int cols){
+    if (isPow2(rows) && isPow2(cols)){
+        GenState_p s1 = create_gen(rows, cols);
+        GenState_p s2 = create_gen(rows, cols);
+        random_gen(s1);
+
+        for (int i = 0; i < 1000; i++) {
+
+            compute_generation_pow2(s1, s2);
+
+            swap((void **) &s1, (void **) &s2);
+        }
+    } else {
+        puts("Rows or Cols are not a power of 2!");
+    }
 }
 
 int main(int argc, char *argv[]) {
-    init_gui();
+    //init_gui();
 
     srand((unsigned) time(0));
 
     //mia();
     //simple();
-    game(128, 128);
+    //game(1024, 1024);
+    game_pow2(1024, 1024);
 
     //SDL_Delay(5000);
     //getchar();
-    quit_gui();
+    //quit_gui();
     return 0;
 }
