@@ -1,3 +1,4 @@
+#ifndef __COMMON__
 #define __COMMON__
 
 #include <stdlib.h>
@@ -31,3 +32,4 @@ void swap(void **a, void **b);
 unsigned char countAliveCells(unsigned char *matrix, size_t x0, size_t x1, size_t x2, size_t y0, size_t y1, size_t y2);
 int isPow2(unsigned int x);
 unsigned int log2pow2(unsigned int x); //peggiora le performance
+#endif

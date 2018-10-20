@@ -1,6 +1,4 @@
-#ifndef __COMMON__
-	#include <common.h> 
-#endif
+#include <common.h> 
 #include <omp.h>
 
 void omp_compute_generation_singlefor(GenState_p s1, GenState_p s2);

@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+#include <cuda.h>
 
 typedef struct {
     unsigned char *matrix;
@@ -166,11 +165,10 @@ void game_Gpu(int rows, int cols, int iterations){
     }
 }
 
-
-
 /*
  * Host main routine
  */
 int main(void){
     game_Gpu(32,32, 1000);
+    prinf("eseguito cuda");
 }

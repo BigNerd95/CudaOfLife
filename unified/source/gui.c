@@ -94,7 +94,7 @@ void simple(int rows, int cols, long int iterations){
     }
 }
 
-
+/*
 int main(int argc, char *argv[]) {
     init_gui();
     srand((unsigned) time(0));
@@ -103,4 +103,4 @@ int main(int argc, char *argv[]) {
 
     quit_gui();
     return 0;
-}
+}*/
