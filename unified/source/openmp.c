@@ -2,7 +2,7 @@
 
 void omp_compute_generation_singlefor(GenState_p s1, GenState_p s2){
     size_t dim = s1->rows * s1->cols;
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < dim; i++) {
 
         size_t x1 = i % s1->cols;

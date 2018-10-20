@@ -3,7 +3,7 @@
 SDL_Window *window;
 SDL_Renderer *renderer;
 int done;
-/*
+
 void color(int x, int y){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
@@ -79,11 +79,15 @@ void simple(int rows, int cols, long int iterations){
         GenState_p s2 = create_gen(rows, cols);
         random_gen(s1);
 
+        display_gen(s1);
+        SDL_Delay(50);
+
         for (int i = 0; i < iterations; i++) {
-            display_gen(s1);
-            SDL_Delay(1000);
             omp_compute_generation_pow2(s1, s2);
             swap((void **) &s1, (void **) &s2);
+
+            display_gen(s1);
+            SDL_Delay(50);
         }
     } else {
         puts("Rows or Cols are not a power of 2!");
@@ -93,14 +97,10 @@ void simple(int rows, int cols, long int iterations){
 
 int main(int argc, char *argv[]) {
     init_gui();
-
     srand((unsigned) time(0));
 
-    simple(64,64,1000);
-    
-    SDL_Delay(5000);
-    getchar();
+    simple(64, 64, 1000);
 
     quit_gui();
     return 0;
-}*/
+}

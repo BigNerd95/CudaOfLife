@@ -113,7 +113,7 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2)){
 }
 
 
-
+/*
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
     check_beehive((&compute_generation_singlefor));
@@ -131,3 +131,4 @@ int main(int argc, char *argv[]) {
     puts("Eseguito correttamente");
     return 0;
 }
+*/

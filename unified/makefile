@@ -2,7 +2,7 @@
 SRCDIR := source
 
 #Definisce la cartella dove ci saranno i file da includere, cioè i file .h 
-INC := -I header
+INC := -Iheader
 
 #Definisce la cartella dove verranno messi i file .o
 BUILDDIR := build
@@ -15,18 +15,18 @@ TARGET := bin/CudaOfLife
 SOURCES := $(shell find $(SRCDIR) -type f -name *.c)
 
 #OBJECTS: trasforma il path dei file da SRCDIR e li dirotta su BUILDDIR modificando i .c in .o
-OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o)) 
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o))
 
 #Tutti i flag per le opzioni aggiuntive del compilatore (o2 è l'ottimizzatore automatico di secondo livello)   
-CFLAGS=-c -Wall -pedantic -std=gnu99 -D_REENTRANT -lSDL2 -fopenmp -O2 
-LDFLAGS=-lm
-CC=gcc
+CFLAGS=-c -Wall -pedantic -std=gnu99 -D_REENTRANT -O2
+LDFLAGS=-lSDL2
+CC=gcc -fopenmp
 
 
 all: $(SOURCES) $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 #$@: Produce un file di output con il nome che metto prima dei :, in questo caso prende il nome contenuto nella variabile TARGET
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
