@@ -14,17 +14,17 @@ gcc omp.c -o omp -O2 -D_REENTRANT -lSDL2 -fopenmp && time ./omp
 void print_gen(GenState_p gen){
     printf("r: %d c: %d\n", gen->rows, gen->cols);
 
-    for (int r = 0; r < gen->rows; r++){
-        for (int c=0; c < gen->cols; c++){
+    for (uint32_t r = 0; r < gen->rows; r++){
+        for (uint32_t c=0; c < gen->cols; c++){
             printf("%d ", gen->matrix[r * gen->cols + c]);
         }
         printf("\n");
     }
 }
 
-GenState_p create_gen(int rows, int cols){
+GenState_p create_gen(uint32_t rows, uint32_t cols){
     GenState_p gen = (GenState_p) malloc(sizeof(GenState));
-    gen->matrix = (unsigned char *) malloc(cols * rows * sizeof(unsigned char));
+    gen->matrix = (uint8_t *) malloc(cols * rows * sizeof(uint8_t));
     gen->rows = rows;
     gen->cols = cols;
     return gen;
@@ -40,7 +40,7 @@ void clear_gen(GenState_p gen){
 }
 
 void random_gen(GenState_p gen){
-    for (int i=0; i < gen->cols * gen->rows; i++){
+    for (uint32_t i=0; i < gen->cols * gen->rows; i++){
         gen->matrix[i] = rand() % 2;
     }
 }
@@ -51,20 +51,20 @@ void swap(void **a, void **b) {
     *b = temp;
 }
 
-unsigned char countAliveCells(unsigned char *matrix, size_t x0, size_t x1, size_t x2, size_t y0, size_t y1, size_t y2) {
+uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2) {
     return matrix[x0 + y0] + matrix[x1 + y0] + matrix[x2 + y0] + matrix[x0 + y1]
          + matrix[x2 + y1] + matrix[x0 + y2] + matrix[x1 + y2] + matrix[x2 + y2];
 }
 
 
-int isPow2(unsigned int x) {
+uint8_t isPow2(uint32_t x) {
     return (x != 0) && ((x & (x - 1)) == 0);
 }
 
 
 //peggiora le performance
-unsigned int log2pow2(unsigned int x){
-    unsigned int pow2 = 0;
+uint32_t log2pow2(uint32_t x){
+    uint32_t pow2 = 0;
     while (x >>= 1){
         pow2++;
     }

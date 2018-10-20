@@ -4,6 +4,7 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 int done;
 
+/*
 void color(int x, int y){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
@@ -15,6 +16,7 @@ void color(int x, int y){
 
     SDL_UpdateWindowSurface(window);
 }
+*/
 
 void clear_all(){
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
@@ -37,11 +39,15 @@ void init_gui() {
         exit(1);
     }
 
+    SDL_SetWindowResizable(window, SDL_FALSE);
+
     renderer = SDL_CreateSoftwareRenderer(SDL_GetWindowSurface(window));
     if(!renderer) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Render creation for surface fail : %s\n",SDL_GetError());
         exit(1);
     }
+
+    done = 0;
 }
 
 void quit_gui(){
@@ -60,8 +66,8 @@ void display_gen(GenState_p gen){
     
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
-    for (int r = 0; r < gen->rows; r++){
-        for (int c=0; c < gen->cols; c++){
+    for (uint32_t r = 0; r < gen->rows; r++){
+        for (uint32_t c = 0; c < gen->cols; c++){
             if (gen->matrix[r * gen->cols + c]){
                 rect.y = r * rect.h; 
                 rect.x = c * rect.w;
@@ -71,36 +77,43 @@ void display_gen(GenState_p gen){
     }
 
     SDL_UpdateWindowSurface(window);
+
+    SDL_Delay(DELAY);
+
+    SDL_Event e;
+    while(SDL_PollEvent(&e) != 0 ){
+        if (e.type == SDL_QUIT){
+            done = 1;
+        }
+    }
 }
 
-void simple(int rows, int cols, long int iterations){
+void simple(uint32_t rows, uint32_t cols){
     if (isPow2(rows) && isPow2(cols)){
         GenState_p s1 = create_gen(rows, cols);
         GenState_p s2 = create_gen(rows, cols);
         random_gen(s1);
 
         display_gen(s1);
-        SDL_Delay(50);
 
-        for (int i = 0; i < iterations; i++) {
+        while (!done) {
             omp_compute_generation_pow2(s1, s2);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
-            SDL_Delay(50);
         }
     } else {
         puts("Rows or Cols are not a power of 2!");
     }
 }
 
-/*
+
 int main(int argc, char *argv[]) {
     init_gui();
     srand((unsigned) time(0));
 
-    simple(64, 64, 1000);
+    simple(64, 64);
 
     quit_gui();
     return 0;
-}*/
+}

@@ -7,9 +7,9 @@
 #define DELAY 50
 
 
-void color(int x, int y);
+//void color(int x, int y);
 void clear_all();
 void init_gui();
 void quit_gui();
 void display_gen(GenState_p gen);
-void simple(int rows, int cols, long int iterations);
+void simple(uint32_t rows, uint32_t cols);

@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> //per il memcpy
-#include <time.h> 
+#include <time.h>
+#include <stdint.h>
 
 /*
 GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
@@ -18,18 +19,18 @@ gcc omp.c -o omp -O2 -D_REENTRANT -lSDL2 -fopenmp && time ./omp
 */
 
 typedef struct {
-    unsigned char *matrix;
-    unsigned int rows;
-    unsigned int cols;
+    uint8_t *matrix;
+    uint32_t rows;
+    uint32_t cols;
 } GenState, *GenState_p;
 
 void print_gen(GenState_p gen);
-GenState_p create_gen(int rows, int cols);
+GenState_p create_gen(uint32_t rows, uint32_t cols);
 void free_gen(GenState_p gen);
 void clear_gen(GenState_p gen);
 void random_gen(GenState_p gen);
 void swap(void **a, void **b);
-unsigned char countAliveCells(unsigned char *matrix, size_t x0, size_t x1, size_t x2, size_t y0, size_t y1, size_t y2);
-int isPow2(unsigned int x);
-unsigned int log2pow2(unsigned int x); //peggiora le performance
+uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2);
+uint8_t isPow2(uint32_t x);
+uint32_t log2pow2(uint32_t x); //peggiora le performance
 #endif
