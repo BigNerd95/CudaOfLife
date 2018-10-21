@@ -108,13 +108,13 @@ void simple(uint32_t rows, uint32_t cols){
     }
 }
 
-/*
+
 int main(int argc, char *argv[]) {
     init_gui();
     srand((unsigned) time(0));
 
-    simple(64, 64);
+    simple(128, 128);
 
     quit_gui();
     return 0;
-}*/
+}

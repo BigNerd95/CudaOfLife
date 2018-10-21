@@ -65,12 +65,8 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     glinder->matrix[19] = 1;
     glinder->matrix[26] = 1;
     glinder->matrix[27] = 1;
-    //printf("\nPrint glinder state 1\n");
-    //print_gen(glinder);
-
+    
     (*compute_generation)(glinder, glinder2, 1);
-    //printf("\nPrint glinder state 2\n");
-    //print_gen(glinder2);  
     for (int i = 0; i < 64; i++){
         if (i == 10 || i == 19 || i == 20 || i == 26 || i == 27) 
             assert(glinder2->matrix[i] == 1);
@@ -79,8 +75,6 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     }
 
     (*compute_generation)(glinder2, glinder, 1);
-    //printf("\nPrint glinder state 3\n");
-    //print_gen(glinder);
     for (int i = 0; i < 64; i++){
         if (i == 11 || i == 20 || i == 26 || i == 27 || i == 28) 
             assert(glinder->matrix[i] == 1);
@@ -128,6 +122,7 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     free_gen(result_gpu);
 }
 
+/*
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
     // Unit test sequential
@@ -169,9 +164,12 @@ int main(int argc, char *argv[]) {
     check_big_world(64, 64, 3);
     puts("Test big world 1 completato");
     
-    check_big_world(1024, 1024, 10);
+    check_big_world(1024, 1024, 1);
+    check_big_world(1024, 1024, 2);
+    check_big_world(1024, 1024, 3);
     puts("Test big world 2 completato");
     
     puts("Eseguito correttamente");
     return 0;
 }
+*/

@@ -156,16 +156,13 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     uint32_t threadsPerBlock = getDeviceInfo();
     
     if (dim_world <= threadsPerBlock){
-        printf("Entrato nel prima if\n");
         kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations);//num_block, dim_block,  
     } else {
         uint32_t cellPerThreads = dim_world / threadsPerBlock; 
         if ( cellPerThreads <= MAX_CELL_PER_THREAD){ 
-            printf("Entrato nel secondo if\n");
             //kernel con un unico blocco con la barrier interna
             kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
         } else {//se sono più di 32 celle per thread si spalma il lavoro su più blocchi
-            printf("Entrato nel terzo if\n");
             uint32_t totalBlocks = cellPerThreads / MAX_CELL_PER_THREAD;//numero di blocchi sarà sempre potenza di 2 positiva 
             for (uint32_t iter = 0; iter< iterations; iter++){
                 kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, MAX_CELL_PER_THREAD);//num_block, dim_block,          

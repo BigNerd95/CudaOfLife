@@ -26,17 +26,16 @@ double get_execution_time(uint32_t rows, uint32_t cols, uint32_t iterations, voi
 /*
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
-    uint32_t word_size = 128;
+    uint32_t word_size = 1024;
     
     for (int i = 1; i < 8; i++){        
-        printf("\n Cpu seriale\n");
-        //printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&compute_generations_singlefor)));
-        printf("\n Cpu OpernMp\n");
+        printf("\n Benchmark Cpu seriale\n");
+        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&compute_generations_singlefor)));
+        printf("\n Benchmark Cpu OpernMp\n");
         printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&omp_compute_generations_singlefor)));
-        printf("\n Gpu\n");
-        //printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&omp_compute_generations_singlefor)));
+        printf("\nBenchmark Gpu\n");
+        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&compute_cpu_generations_on_gpu)));
         word_size  *= 2;
     }
     return 0;
-}
-*/
+}*/

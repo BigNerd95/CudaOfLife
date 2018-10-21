@@ -2,7 +2,7 @@
 
 #include <sequential.h> 
 #include <openmp.h>
-#include <cuda.h>
+#include <cudax.h>
 #include <sys/time.h>   
 #include <sys/resource.h> 
 
