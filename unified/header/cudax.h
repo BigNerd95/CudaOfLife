@@ -15,7 +15,7 @@ __device__ uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, ui
 //uint32_t getDeviceInfo();
 //void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations);
 //GenStateGpu_p create_gen_gpu(uint32_t rows, uint32_t cols);
-void compute_cpu_generation_on_gpu(GenState_p s1, GenState_p s2);
+void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations);
 //void gen_h2d(GenState_p gen_host, GenStateGpu_p gen_device);
 //void gen_d2h(GenStateGpu_p gen_device, GenState_p gen_host);
 //void random_gen_gpu(GenStateGpu_p gen);

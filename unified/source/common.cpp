@@ -39,6 +39,12 @@ void clear_gen(GenState_p gen){
     memset(gen->matrix, 0, gen->cols * gen->rows);
 }
 
+GenState_p clone_gen(GenState_p src){
+    GenState_p dst = create_gen(src->rows, src->cols);
+    memcpy(dst->matrix, dst->matrix, src->cols * src->rows);
+    return dst; 
+} 
+
 void random_gen(GenState_p gen){
     for (uint32_t i=0; i < gen->cols * gen->rows; i++){
         gen->matrix[i] = rand() % 2;
@@ -49,6 +55,14 @@ void swap(void **a, void **b) {
     void *temp = *a;
     *a = *b;
     *b = temp;
+}
+
+uint8_t compare_gen(GenState_p gen1, GenState_p gen2){
+    uint8_t result = 0;
+    if(gen1->rows == gen2->rows && gen1->cols == gen2->cols){
+        result = !memcmp(gen1->matrix, gen2->matrix, gen1->rows * gen1->cols);
+    }
+    return result;
 }
 
 uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2) {

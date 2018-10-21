@@ -1,6 +1,6 @@
 #include <sequential.h>
 #include <openmp.h>
-#include <cuda.h>
+#include <cudax.h>
 #include <assert.h>
 
 void check_blinker(void (*compute_generation)(GenState_p s1, GenState_p s2));

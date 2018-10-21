@@ -93,15 +93,16 @@ void simple(uint32_t rows, uint32_t cols){
         GenState_p s1 = create_gen(rows, cols);
         GenState_p s2 = create_gen(rows, cols);
         random_gen(s1);
-
         display_gen(s1);
 
         while (!done) {
-            omp_compute_generation_pow2(s1, s2);
+            omp_compute_generations_pow2(s1, s2, 1);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
         }
+        free_gen(s1);
+        free_gen(s2);
     } else {
         puts("Rows or Cols are not a power of 2!");
     }

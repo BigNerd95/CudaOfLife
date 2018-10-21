@@ -1,5 +1,5 @@
 #include <common.h> 
 
-void compute_generation_singlefor(GenState_p s1, GenState_p s2);
-void compute_generation(GenState_p s1, GenState_p s2);
-void compute_generation_pow2(GenState_p s1, GenState_p s2);
+void compute_generations_singlefor(GenState_p s1, GenState_p s2, uint32_t iterations);
+void compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations);
+void compute_generations_pow2(GenState_p s1, GenState_p s2, uint32_t iterations);
