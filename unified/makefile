@@ -34,16 +34,16 @@ CUOBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(CUSOURCES:.cu=.cuo))
 
 #Tutti i flag per le opzioni aggiuntive del compilatore (o2 è l'ottimizzatore automatico di secondo livello)   
 CFLAGS=-c -Wall -pedantic -std=gnu99 -D_REENTRANT -O2
-LDFLAGS=-lSDL2 -lcudart
+LDFLAGS=-lSDL2 -lcuda -lcudart
 CC=gcc -fopenmp
 
 CUFLAGS=-Xcompiler -fPIC
-NVCC=nvcc
+NVCC=nvcc -ccbin gcc
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS) $(CUOBJECTS)
-	$(CC) $(OBJECTS) $(CUOBJECTS) $(LDFLAGS) -o $@
+$(TARGET): $(CUOBJECTS) $(OBJECTS) 
+	$(CC) $(CUOBJECTS) $(OBJECTS) $(LDFLAGS) -o $@
 #$@: Produce un file di output con il nome che metto prima dei :, in questo caso prende il nome contenuto nella variabile TARGET
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c

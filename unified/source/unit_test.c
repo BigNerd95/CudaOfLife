@@ -113,10 +113,10 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2)){
 }
 
 
-/*
+
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
-    check_beehive((&compute_generation_singlefor));
+    /*check_beehive((&compute_generation_singlefor));
     check_blinker((&compute_generation_singlefor));
     check_glinder((&compute_generation_singlefor));
 
@@ -126,9 +126,10 @@ int main(int argc, char *argv[]) {
 
     check_beehive(&compute_generation_pow2);
     check_blinker(&compute_generation_pow2);
-    check_glinder(&compute_generation_pow2);
+    check_glinder(&compute_generation_pow2);*/
+
+    check_beehive((&compute_cpu_generation_on_gpu));
 
     puts("Eseguito correttamente");
     return 0;
 }
-*/

@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
-#include <openmp.h>
 #include <sequential.h>  
+#include <openmp.h>
+#include <cuda.h>
 
 #define WIDTH 640
 #define HEIGHT 640

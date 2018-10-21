@@ -1,7 +1,8 @@
 #define _POSIX_C_SOURCE 199309L
 
+#include <sequential.h> 
 #include <openmp.h>
-#include <sequential.h>  
+#include <cuda.h>
 #include <sys/time.h>   
 #include <sys/resource.h> 
 
