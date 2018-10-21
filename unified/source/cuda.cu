@@ -1,6 +1,6 @@
-extern "C"{
+//extern "C" {
 #include <cuda.h>
-}
+//}
 //#include <common.h>
 
 
@@ -85,7 +85,7 @@ __global__ void kernel_compute_gen(uint8_t *matrix_src, uint8_t *matrix_dst,  ui
 }
 
 uint32_t getDeviceInfo(){
-    int deviceCount = 1;
+    int deviceCount = 0;
     cudaSetDevice(deviceCount);
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, deviceCount);
@@ -96,7 +96,7 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     // Load gpu info for optimal load balancing   
     uint32_t dim_world = s1->rows * s1->cols;
     uint32_t threadsPerBlock = getDeviceInfo();
-
+    
     if (dim_world <= threadsPerBlock){
         kernel_compute_gen<<<1, dim_world>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations);//num_block, dim_block,  
     } /*else {
@@ -111,7 +111,7 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     }*/
 }
 
-extern "C"
+//extern "C" 
 void compute_cpu_generation_on_gpu(GenState_p s1, GenState_p s2){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
@@ -149,7 +149,8 @@ void game_Gpu(uint32_t rows, uint32_t cols, uint32_t iterations){
 /*
  * Host main routine
  */
+ /*
 int main(void){
     //game_Gpu(32,32, 1000);
     printf("eseguito cuda");
-}
+}*/

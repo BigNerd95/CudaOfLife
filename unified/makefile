@@ -24,20 +24,21 @@ TARGET := bin/CudaOfLife
 
 
 #avvia il comando find da shell che cerca tutti i file .c nella cartella specificata da SRCDIR, -type f = (regular file)
-SOURCES := $(shell find $(SRCDIR) -type f -name *.c)
+SOURCES := $(shell find $(SRCDIR) -type f -name *.cpp)
 
 #OBJECTS: trasforma il path dei file da SRCDIR e li dirotta su BUILDDIR modificando i .c in .o
-OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.cpp=.o))
 
 CUSOURCES := $(shell find $(SRCDIR) -type f -name *.cu)
 CUOBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(CUSOURCES:.cu=.cuo))
 
 #Tutti i flag per le opzioni aggiuntive del compilatore (o2 è l'ottimizzatore automatico di secondo livello)   
-CFLAGS=-c -Wall -pedantic -std=gnu99 -D_REENTRANT -O2
+CFLAGS=-c -Wall -pedantic -D_REENTRANT -O2
 LDFLAGS=-lSDL2 -lcuda -lcudart
-CC=gcc -fopenmp
+CC=g++ -fopenmp
 
-CUFLAGS=-Xcompiler -fPIC
+CUFLAGS=-c
+# -Xcompiler -fPIC
 NVCC=nvcc -ccbin gcc
 
 all: $(TARGET)
@@ -46,7 +47,7 @@ $(TARGET): $(CUOBJECTS) $(OBJECTS)
 	$(CC) $(CUOBJECTS) $(OBJECTS) $(LDFLAGS) -o $@
 #$@: Produce un file di output con il nome che metto prima dei :, in questo caso prende il nome contenuto nella variabile TARGET
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) $(INC) $< -o $@
 #$<: include solo la prima dipendenza
