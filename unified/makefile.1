@@ -1,20 +1,8 @@
-#BENCHMARK := benchmark
-#UNITTEST := unittest
-#GUI := gui
-
-#SRCDIR := src
-#INC := include
-#BUILDDIR := build
-
-#BINBENCHMARK := bin/$(BENCHMARK)
-#SRCBENCHMARK := $(shell find $(BENCHMARK)/$(SRCDIR) -type f -name "*.c")
-#OBJBENCHMARK := $(patsubst $(LOADER)/$(SRCDIR)/%,$(BUILDDIR)/$(LOADER)/%,$(SRCLOADER:.c=.o)) 
-
 #Definisce il nome della cartella che conterra i file in .c
 SRCDIR := source
 
 #Definisce la cartella dove ci saranno i file da includere, cioè i file .h 
-INC :=-Iheader
+INC := -Iheader
 
 #Definisce la cartella dove verranno messi i file .o
 BUILDDIR := build
@@ -29,31 +17,24 @@ SOURCES := $(shell find $(SRCDIR) -type f -name *.c)
 #OBJECTS: trasforma il path dei file da SRCDIR e li dirotta su BUILDDIR modificando i .c in .o
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o))
 
-CUSOURCES := $(shell find $(SRCDIR) -type f -name *.cu)
-CUOBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(CUSOURCES:.cu=.cuo))
-
 #Tutti i flag per le opzioni aggiuntive del compilatore (o2 è l'ottimizzatore automatico di secondo livello)   
 CFLAGS=-c -Wall -pedantic -std=gnu99 -D_REENTRANT -O2
-LDFLAGS=-lSDL2 -lcudart
+LDFLAGS=-lSDL2
 CC=gcc -fopenmp
-
-CUFLAGS=-Xcompiler -fPIC
 NVCC=nvcc
 
-all: $(TARGET)
 
-$(TARGET): $(OBJECTS) $(CUOBJECTS)
-	$(CC) $(OBJECTS) $(CUOBJECTS) $(LDFLAGS) -o $@
+all: $(SOURCES) $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 #$@: Produce un file di output con il nome che metto prima dei :, in questo caso prende il nome contenuto nella variabile TARGET
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) $(INC) $< -o $@
+	
 #$<: include solo la prima dipendenza
-
-$(BUILDDIR)/%.cuo: $(SRCDIR)/%.cu
-	@mkdir -p $(BUILDDIR)
-	$(NVCC) $(CUFLAGS) $(INC) $< -o $@
 
 clean:
 	rm -r $(BUILDDIR) $(TARGET)

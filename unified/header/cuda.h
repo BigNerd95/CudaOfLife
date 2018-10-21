@@ -12,8 +12,8 @@ __device__ uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, ui
          + matrix[x2 + y1] + matrix[x0 + y2] + matrix[x1 + y2] + matrix[x2 + y2];
 }*/
 
-void swap(void **a, void **b);
-void kernel_compute_gen(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols, uint32_t iterations);
+
+__global__ void kernel_compute_gen(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols, uint32_t iterations);
 uint32_t getDeviceInfo();
 void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations);
 GenStateGpu_p create_gen_gpu(uint32_t rows, uint32_t cols);
