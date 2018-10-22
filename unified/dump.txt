@@ -1,0 +1,144 @@
+
+(Benchmark Gpu) -> Word size: 32 -> Number of iterations: 1000, Amount of time: 0.067862
+
+(Benchmark OpenMp) -> Word size: 32 -> Number of iterations: 1000, Amount of time: 0.069734
+
+(Benchmark Sequential) -> Word size: 32 -> Number of iterations: 1000, Amount of time: 0.161076
+
+(Benchmark Gpu) -> Word size: 32 -> Number of iterations: 10000, Amount of time: 0.008836
+
+(Benchmark OpenMp) -> Word size: 32 -> Number of iterations: 10000, Amount of time: 0.069190
+
+(Benchmark Sequential) -> Word size: 32 -> Number of iterations: 10000, Amount of time: 0.159722
+
+(Benchmark Gpu) -> Word size: 32 -> Number of iterations: 100000, Amount of time: 0.008214
+
+(Benchmark OpenMp) -> Word size: 32 -> Number of iterations: 100000, Amount of time: 0.070497
+
+(Benchmark Sequential) -> Word size: 32 -> Number of iterations: 100000, Amount of time: 0.157424
+
+(Benchmark Gpu) -> Word size: 32 -> Number of iterations: 1000000, Amount of time: 0.008772
+
+(Benchmark OpenMp) -> Word size: 32 -> Number of iterations: 1000000, Amount of time: 0.075880
+
+(Benchmark Sequential) -> Word size: 32 -> Number of iterations: 1000000, Amount of time: 0.157854
+
+(Benchmark Gpu) -> Word size: 64 -> Number of iterations: 1000, Amount of time: 0.028876
+
+(Benchmark OpenMp) -> Word size: 64 -> Number of iterations: 1000, Amount of time: 0.294389
+
+(Benchmark Sequential) -> Word size: 64 -> Number of iterations: 1000, Amount of time: 0.636952
+
+(Benchmark Gpu) -> Word size: 64 -> Number of iterations: 10000, Amount of time: 0.028337
+
+(Benchmark OpenMp) -> Word size: 64 -> Number of iterations: 10000, Amount of time: 0.258354
+
+(Benchmark Sequential) -> Word size: 64 -> Number of iterations: 10000, Amount of time: 0.625226
+
+(Benchmark Gpu) -> Word size: 64 -> Number of iterations: 100000, Amount of time: 0.028325
+
+(Benchmark OpenMp) -> Word size: 64 -> Number of iterations: 100000, Amount of time: 0.259734
+
+(Benchmark Sequential) -> Word size: 64 -> Number of iterations: 100000, Amount of time: 0.621073
+
+(Benchmark Gpu) -> Word size: 64 -> Number of iterations: 1000000, Amount of time: 0.028902
+
+(Benchmark OpenMp) -> Word size: 64 -> Number of iterations: 1000000, Amount of time: 0.257709
+
+(Benchmark Sequential) -> Word size: 64 -> Number of iterations: 1000000, Amount of time: 0.626719
+
+(Benchmark Gpu) -> Word size: 128 -> Number of iterations: 1000, Amount of time: 0.249076
+
+(Benchmark OpenMp) -> Word size: 128 -> Number of iterations: 1000, Amount of time: 1.006365
+
+(Benchmark Sequential) -> Word size: 128 -> Number of iterations: 1000, Amount of time: 2.522609
+
+(Benchmark Gpu) -> Word size: 128 -> Number of iterations: 10000, Amount of time: 0.271747
+
+(Benchmark OpenMp) -> Word size: 128 -> Number of iterations: 10000, Amount of time: 1.005641
+
+(Benchmark Sequential) -> Word size: 128 -> Number of iterations: 10000, Amount of time: 2.530414
+
+(Benchmark Gpu) -> Word size: 128 -> Number of iterations: 100000, Amount of time: 0.251906
+
+(Benchmark OpenMp) -> Word size: 128 -> Number of iterations: 100000, Amount of time: 1.010804
+
+(Benchmark Sequential) -> Word size: 128 -> Number of iterations: 100000, Amount of time: 2.499677
+
+(Benchmark Gpu) -> Word size: 128 -> Number of iterations: 1000000, Amount of time: 0.255199
+
+(Benchmark OpenMp) -> Word size: 128 -> Number of iterations: 1000000, Amount of time: 1.001116
+
+(Benchmark Sequential) -> Word size: 128 -> Number of iterations: 1000000, Amount of time: 2.489042
+
+(Benchmark Gpu) -> Word size: 256 -> Number of iterations: 1000, Amount of time: 0.977273
+
+(Benchmark OpenMp) -> Word size: 256 -> Number of iterations: 1000, Amount of time: 4.074591
+
+(Benchmark Sequential) -> Word size: 256 -> Number of iterations: 1000, Amount of time: 10.141364
+
+(Benchmark Gpu) -> Word size: 256 -> Number of iterations: 10000, Amount of time: 0.975168
+
+(Benchmark OpenMp) -> Word size: 256 -> Number of iterations: 10000, Amount of time: 3.995305
+
+(Benchmark Sequential) -> Word size: 256 -> Number of iterations: 10000, Amount of time: 10.118783
+
+(Benchmark Gpu) -> Word size: 256 -> Number of iterations: 100000, Amount of time: 0.975057
+
+(Benchmark OpenMp) -> Word size: 256 -> Number of iterations: 100000, Amount of time: 4.007954
+
+(Benchmark Sequential) -> Word size: 256 -> Number of iterations: 100000, Amount of time: 10.127762
+
+(Benchmark Gpu) -> Word size: 256 -> Number of iterations: 1000000, Amount of time: 0.985430
+
+(Benchmark OpenMp) -> Word size: 256 -> Number of iterations: 1000000, Amount of time: 4.011949
+
+(Benchmark Sequential) -> Word size: 256 -> Number of iterations: 1000000, Amount of time: 10.144387
+
+(Benchmark Gpu) -> Word size: 512 -> Number of iterations: 1000, Amount of time: 2.429114
+
+(Benchmark OpenMp) -> Word size: 512 -> Number of iterations: 1000, Amount of time: 16.147615
+
+(Benchmark Sequential) -> Word size: 512 -> Number of iterations: 1000, Amount of time: 40.532996
+
+(Benchmark Gpu) -> Word size: 512 -> Number of iterations: 10000, Amount of time: 2.446688
+
+(Benchmark OpenMp) -> Word size: 512 -> Number of iterations: 10000, Amount of time: 16.145430
+
+(Benchmark Sequential) -> Word size: 512 -> Number of iterations: 10000, Amount of time: 40.481310
+
+(Benchmark Gpu) -> Word size: 512 -> Number of iterations: 100000, Amount of time: 2.449086
+
+(Benchmark OpenMp) -> Word size: 512 -> Number of iterations: 100000, Amount of time: 16.187939
+
+(Benchmark Sequential) -> Word size: 512 -> Number of iterations: 100000, Amount of time: 40.468284
+
+(Benchmark Gpu) -> Word size: 512 -> Number of iterations: 1000000, Amount of time: 2.450064
+
+(Benchmark OpenMp) -> Word size: 512 -> Number of iterations: 1000000, Amount of time: 16.191640
+
+(Benchmark Sequential) -> Word size: 512 -> Number of iterations: 1000000, Amount of time: 40.472006
+
+(Benchmark Gpu) -> Word size: 1024 -> Number of iterations: 1000, Amount of time: 9.733993
+
+(Benchmark OpenMp) -> Word size: 1024 -> Number of iterations: 1000, Amount of time: 66.391842
+
+(Benchmark Sequential) -> Word size: 1024 -> Number of iterations: 1000, Amount of time: 162.760850
+
+(Benchmark Gpu) -> Word size: 1024 -> Number of iterations: 10000, Amount of time: 9.731292
+
+(Benchmark OpenMp) -> Word size: 1024 -> Number of iterations: 10000, Amount of time: 64.462490
+
+(Benchmark Sequential) -> Word size: 1024 -> Number of iterations: 10000, Amount of time: 161.784402
+
+(Benchmark Gpu) -> Word size: 1024 -> Number of iterations: 100000, Amount of time: 9.715538
+
+(Benchmark OpenMp) -> Word size: 1024 -> Number of iterations: 100000, Amount of time: 65.093358
+
+(Benchmark Sequential) -> Word size: 1024 -> Number of iterations: 100000, Amount of time: 162.063450
+
+(Benchmark Gpu) -> Word size: 1024 -> Number of iterations: 1000000, Amount of time: 9.728571
+
+(Benchmark OpenMp) -> Word size: 1024 -> Number of iterations: 1000000, Amount of time: 64.434511
+
+(Benchmark Sequential) -> Word size: 1024 -> Number of iterations: 1000000, Amount of time: 162.237711

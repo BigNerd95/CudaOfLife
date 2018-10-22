@@ -23,19 +23,16 @@ double get_execution_time(uint32_t rows, uint32_t cols, uint32_t iterations, voi
     return total_time;
 }
 
-/*
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
-    uint32_t word_size = 1024;
     
-    for (int i = 1; i < 8; i++){        
-        printf("\n Benchmark Cpu seriale\n");
-        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&compute_generations_singlefor)));
-        printf("\n Benchmark Cpu OpernMp\n");
-        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&omp_compute_generations_singlefor)));
-        printf("\nBenchmark Gpu\n");
-        printf("\nWord size: %d. Amount of time: %lf\n", word_size, get_execution_time(word_size, word_size, 10000, (&compute_cpu_generations_on_gpu)));
-        word_size  *= 2;
+    for (uint32_t world_size = 32; world_size <= 1024; world_size = world_size*2){        
+        for (uint32_t iterations = 1000; iterations <= 1000000; iterations = iterations*10){        
+            printf("\n(Benchmark Gpu) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, 10000, (&compute_cpu_generations_on_gpu)));
+            printf("\n(Benchmark OpenMp) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, 10000, (&omp_compute_generations_singlefor)));
+            printf("\n(Benchmark Sequential) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, 10000, (&compute_generations_singlefor)));
+        }
     }
+    
     return 0;
-}*/
+}
