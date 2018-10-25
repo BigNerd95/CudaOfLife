@@ -3,7 +3,8 @@
 //}
 //#include <common.h>
 
-#define MAX_CELL_PER_THREAD 32
+//#define MAX_CELL_PER_THREAD 32
+#define MAX_CELL_PER_THREAD 2
 
 /*
 __device__ uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2) {
@@ -62,18 +63,17 @@ __device__ void gpu_swap(void **a, void **b) {
 /**
  * 1) Kernel device routine
  */
-__global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols, uint32_t iterations) {
+__global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t iterations) {
     //each thread loads one element from global to shared mem
-    uint32_t i = threadIdx.x;
-    uint32_t dim = rows * cols;
+    uint32_t cell = threadIdx.x;
     
-    uint32_t x1 = i & cols-1;//% cols;
-    uint32_t x0 = (x1 - 1) & cols-1;//% cols;
-    uint32_t x2 = (x1 + 1) & cols-1;//% cols;
+    uint32_t x1 = cell     & cols-1; //% cols;
+    uint32_t x0 = (x1 - 1) & cols-1; //% cols;
+    uint32_t x2 = (x1 + 1) & cols-1; //% cols;
 
-    uint32_t y1 = i - x1;
-    uint32_t y0 = (y1 - cols) & dim-1;//% dim;
-    uint32_t y2 = (y1 + cols) & dim-1;//% dim;
+    uint32_t y1 = cell - x1;
+    uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
+    uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
 
     for (uint32_t iter = 0; iter < iterations; iter++){
         uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
@@ -87,21 +87,20 @@ __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *m
 /**
  * 2) Kernel device routine
  */
- __global__ void kernel_compute_gen_singleblock(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols, uint32_t iterations, uint32_t cellPerThreads) {
+ __global__ void kernel_compute_gen_singleblock(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t iterations, uint32_t cellPerThreads) {
     //each thread loads one element from global to shared mem
     uint32_t start = threadIdx.x * cellPerThreads; //punto di partenza di ogni thread, una cella ogni 32
-    uint32_t dim = rows * cols;
-        
-    for (uint32_t iter = 0; iter < iterations; iter++){
-        for (uint32_t cell = 0; cell < cellPerThreads; cell++){
-            uint32_t i = start + cell; 
-            uint32_t x1 = i & cols-1;//% cols;
-            uint32_t x0 = (x1 - 1) & cols-1;//% cols;
-            uint32_t x2 = (x1 + 1) & cols-1;//% cols;
+    uint32_t end =  cellPerThreads + start;
 
-            uint32_t y1 = i - x1;
-            uint32_t y0 = (y1 - cols) & dim-1;//% dim;
-            uint32_t y2 = (y1 + cols) & dim-1;//% dim;
+    for (uint32_t iter = 0; iter < iterations; iter++){
+        for (uint32_t cell = start; cell < end; cell++){
+            uint32_t x1 = cell     & cols-1; //% cols;
+            uint32_t x0 = (x1 - 1) & cols-1; //% cols;
+            uint32_t x2 = (x1 + 1) & cols-1; //% cols;
+
+            uint32_t y1 = cell - x1;
+            uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
+            uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
 
             uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
                                  matrix_src[x2 + y1] + matrix_src[x0 + y2] + matrix_src[x1 + y2] + matrix_src[x2 + y2];
@@ -117,23 +116,24 @@ __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *m
 /**
  * 3) Kernel device routine
  */
- __global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols, uint32_t cellPerThreads) {
+ __global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t cellPerThreads) {
     //each thread loads one element from global to shared mem
-    uint32_t start = (blockIdx.x*blockDim.x + threadIdx.x) * cellPerThreads; //punto di partenza di ogni thread, una cella ogni 32
-    uint32_t dim = rows * cols;    
+    //uint32_t dim = rows * cols;    
     //if(threadIdx.x == 0)
-      //  printf("Il mio start vale %d mentre il mio blockid vale %d\n", start, blockIdx.x);
+    //  printf("Il mio start vale %d mentre il mio blockid vale %d\n", start, blockIdx.x);
     
+    //punto di partenza di ogni thread, una cella ogni 32
+    uint32_t start = (blockIdx.x*blockDim.x + threadIdx.x) * cellPerThreads;
+    uint32_t end =  cellPerThreads + start;
 
-    for (uint32_t cell = 0; cell < cellPerThreads; cell++){
-        uint32_t i = start + cell; 
-        uint32_t x1 = i & cols-1;//% cols;
-        uint32_t x0 = (x1 - 1) & cols-1;//% cols;
-        uint32_t x2 = (x1 + 1) & cols-1;//% cols;
+    for (uint32_t cell = start; cell < end; cell++){
+        uint32_t x1 = cell     & cols-1; //% cols;
+        uint32_t x0 = (x1 - 1) & cols-1; //% cols;
+        uint32_t x2 = (x1 + 1) & cols-1; //% cols;
 
-        uint32_t y1 = i - x1;
-        uint32_t y0 = (y1 - cols) & dim-1;//% dim;
-        uint32_t y2 = (y1 + cols) & dim-1;//% dim;
+        uint32_t y1 = cell - x1;
+        uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
+        uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
 
         uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
                                 matrix_src[x2 + y1] + matrix_src[x0 + y2] + matrix_src[x1 + y2] + matrix_src[x2 + y2];
@@ -156,17 +156,26 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     uint32_t threadsPerBlock = getDeviceInfo();
     
     if (dim_world <= threadsPerBlock){
-        kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations);//num_block, dim_block,  
+    
+        kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, iterations);//num_block, dim_block,  
+    
     } else {
+        
         uint32_t cellPerThreads = dim_world / threadsPerBlock; 
-        if ( cellPerThreads <= MAX_CELL_PER_THREAD){ 
+        if (cellPerThreads <= MAX_CELL_PER_THREAD){ 
+        
             //kernel con un unico blocco con la barrier interna
-            kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
-        } else {//se sono più di 32 celle per thread si spalma il lavoro su più blocchi
+            kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
+        
+        } else {
+
+            //se sono più di 32 celle per thread si spalma il lavoro su più blocchi
             uint32_t totalBlocks = cellPerThreads / MAX_CELL_PER_THREAD;//numero di blocchi sarà sempre potenza di 2 positiva 
             for (uint32_t iter = 0; iter< iterations; iter++){
-                kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, MAX_CELL_PER_THREAD);//num_block, dim_block,          
+        
+                kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, MAX_CELL_PER_THREAD);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);
+        
             }
         }
     }
@@ -197,6 +206,7 @@ BACKUP void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32
 void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
+
     gen_h2d(s1, gen_device_1);
     compute_generation_on_gpu(gen_device_1, gen_device_2, iterations);
     gen_d2h(gen_device_2, s2);

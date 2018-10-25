@@ -1,8 +1,9 @@
 #include <openmp.h> 
 
 void omp_compute_generations_singlefor(GenState_p s1, GenState_p s2, uint32_t iterations){
-    for (uint32_t iter = 0; iter < iterations; iter ++){
-        uint32_t dim = s1->rows * s1->cols;
+    uint32_t dim = s1->rows * s1->cols;
+    
+    for (uint32_t iter = 0; iter < iterations; iter ++){    
         #pragma omp parallel for
         for (uint32_t i = 0; i < dim; i++) {
 
@@ -23,7 +24,7 @@ void omp_compute_generations_singlefor(GenState_p s1, GenState_p s2, uint32_t it
 
 void omp_compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations){
     for (uint32_t iter = 0; iter < iterations; iter ++){
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (uint32_t y = 0; y < s1->rows; y++) {
             uint32_t y0 = ((y - 1) % s1->rows) * s1->cols;
             uint32_t y1 = y * s1->cols;
@@ -46,16 +47,17 @@ void omp_compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations){
 //////////////////////////////////////////////////////////////
 
 void omp_compute_generations_pow2(GenState_p s1, GenState_p s2, uint32_t iterations){
-    for (uint32_t iter = 0; iter < iterations; iter ++){
+    uint32_t rows_m1 = s1->rows - 1;
+    uint32_t cols_m1 = s1->cols - 1;
+    uint32_t cols_p2 = log2pow2(s1->cols);
     
-        uint32_t rows_m1 = s1->rows - 1;
-        uint32_t cols_m1 = s1->cols - 1;
+    for (uint32_t iter = 0; iter < iterations; iter ++){
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (uint32_t y = 0; y < s1->rows; y++) {
-            uint32_t y0 = ((y - 1) & rows_m1) * s1->cols;
-            uint32_t y1 = y                   * s1->cols;
-            uint32_t y2 = ((y + 1) & rows_m1) * s1->cols;
+            uint32_t y0 = ((y - 1) & rows_m1) << cols_p2; //* s1->cols;
+            uint32_t y1 = y                   << cols_p2; //* s1->cols;
+            uint32_t y2 = ((y + 1) & rows_m1) << cols_p2; //* s1->cols;
 
             for (uint32_t x = 0; x < s1->cols; x++) {
                 uint32_t x0 = (x - 1) & cols_m1;
