@@ -13,15 +13,15 @@ int main(int argc, char **argv){
         argc--;
         argv++;
         if (!strcmp("gui", *argv)){
-            printf("Avvio GUI\n");
+            printf("Running GUI\n");
             gui_main(argc, argv);
 
         } else if (!strcmp("test", *argv)){
-            printf("Avvio Unit Testing\n");
+            printf("Running Unit Testing\n");
             unit_testing_main(argc, argv);
 
         } else if (!strcmp("bench", *argv)){
-            printf("Avvio Benchmark\n");
+            printf("Running Benchmark\n");
             benchmark_main(argc, argv);
 
         } else {

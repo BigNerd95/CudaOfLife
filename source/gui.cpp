@@ -75,7 +75,7 @@ void display_gen(GenState_p gen){
     }
 }
 
-void simple(uint32_t rows, uint32_t cols){
+void run_gui(uint32_t rows, uint32_t cols, void (*compute_generation)(GenState_p s1, GenState_p s2, uint32_t iterations)){
     if (isPow2(rows) && isPow2(cols)){
         GenState_p s1 = create_gen(rows, cols);
         GenState_p s2 = create_gen(rows, cols);
@@ -83,7 +83,7 @@ void simple(uint32_t rows, uint32_t cols){
         display_gen(s1);
 
         while (!done) {
-            omp_compute_generations(s1, s2, 1);
+            compute_generations(s1, s2, 1);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
@@ -100,7 +100,27 @@ int gui_main(int argc, char *argv[]) {
     init_gui();
     srand((unsigned) time(0));
 
-    simple(128, 128);
+    if (argc > 1) {
+        argc--;
+        argv++;
+        if (!strcmp("seq", *argv)){
+            printf("on CPU\n");
+            run_gui(128, 128, compute_generations);
+
+        } else if (!strcmp("omp", *argv)){
+            printf("on OMP\n");
+            run_gui(128, 128, omp_compute_generations);
+
+        } else if (!strcmp("cuda", *argv)){
+            printf("on CUDA\n");
+            run_gui(128, 128, compute_cpu_generations_on_gpu);
+
+        } else {
+            printf("Unknown command!\n");
+        }
+    } else {
+        run_gui(128, 128, compute_generations);
+    }
 
     quit_gui();
     return 0;
