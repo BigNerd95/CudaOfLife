@@ -3,7 +3,6 @@
 //}
 //#include <common.h>
 
-//#define MAX_CELL_PER_THREAD 32
 #define MAX_CELL_PER_THREAD 2
 
 /*
@@ -156,20 +155,18 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     uint32_t threadsPerBlock = getDeviceInfo();
     
     if (dim_world <= threadsPerBlock){
-    
-        kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, iterations);//num_block, dim_block,  
-    
+        //printf("1 if");
+        kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations);//num_block, dim_block,  
     } else {
         
         uint32_t cellPerThreads = dim_world / threadsPerBlock; 
         if (cellPerThreads <= MAX_CELL_PER_THREAD){ 
         
             //kernel con un unico blocco con la barrier interna
-            kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
-        
-        } else {
-
-            //se sono più di 32 celle per thread si spalma il lavoro su più blocchi
+            //printf("2 if");
+            kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
+        } else {//se sono più di 32 celle per thread si spalma il lavoro su più blocchi
+            //printf("3 if");
             uint32_t totalBlocks = cellPerThreads / MAX_CELL_PER_THREAD;//numero di blocchi sarà sempre potenza di 2 positiva 
             for (uint32_t iter = 0; iter< iterations; iter++){
         
@@ -202,7 +199,7 @@ BACKUP void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32
     }
 }*/
 
-//extern "C" 
+ 
 void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);

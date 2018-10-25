@@ -25,21 +25,12 @@ double get_execution_time(uint32_t rows, uint32_t cols, uint32_t iterations, voi
 
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
-    printf("\n(Benchmark Cuda)");
-
-    for (uint32_t world_size = 32; world_size <= 2048; world_size = world_size*2){        
-        printf("\nWord size: %d", world_size);
-        //printf("\nIterations: %d -> %lf\n", 100000, get_execution_time(world_size, world_size, 1000 /*100000*/, (&compute_cpu_generations_on_gpu)));        
-        //printf("\nIterations: %d -> %lf\n", 100000, get_execution_time(world_size, world_size, 1000 /*100000*/, (&omp_compute_generations_pow2)));        
-        printf("\nIterations: %d -> %lf\n", 100000, get_execution_time(world_size, world_size, 1000 /*100000*/, (&compute_generations_pow2)));        
-
-
-        //for (uint32_t iterations = 1000; iterations <= 100000; iterations = iterations*10){        
-            //printf("\nIterations: %d -> %lf\n", iterations, get_execution_time(world_size, world_size, iterations, (&omp_compute_generations_singlefor)));
-            //printf("\n(Benchmark Gpu) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
-            //printf("\n(Benchmark OpenMp) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, iterations, (&omp_compute_generations_singlefor)));
-            //printf("\n(Benchmark Sequential) -> Word size: %d -> Number of iterations: %d, Amount of time: %lf\n", world_size, iterations, get_execution_time(world_size, world_size, iterations, (&compute_generations_singlefor)));
-        //}
+    uint32_t iterations = 1000;
+    for (uint32_t world_size = 32; world_size <= 17000; world_size = world_size*2){        
+            printf("\nWord size: %d\n", world_size);
+            printf("(Benchmark Gpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
+            printf("(Benchmark OpenMp) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&omp_compute_generations_pow2)));
+            printf("(Benchmark Sequential) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations_pow2)));
     }
     return 0;
 }
