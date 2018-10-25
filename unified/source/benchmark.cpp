@@ -26,11 +26,10 @@ double get_execution_time(uint32_t rows, uint32_t cols, uint32_t iterations, voi
 int main(int argc, char *argv[]) {
     srand((unsigned) time(0));
     uint32_t iterations = 1000;
-    for (uint32_t world_size = 32; world_size <= 17000; world_size = world_size*2){        
-            printf("\nWord size: %d\n", world_size);
-            printf("(Benchmark Gpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
-            printf("(Benchmark OpenMp) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&omp_compute_generations_pow2)));
-            printf("(Benchmark Sequential) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations_pow2)));
+    for (uint32_t world_size = 32; world_size <= 4096; world_size = world_size*2){        
+            printf("(Cpu Pow2) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations)));
+            printf("(Benchmark OpenMp) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&omp_compute_generations)));
+            printf("(Benchmark Sequential) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
     }
     return 0;
 }

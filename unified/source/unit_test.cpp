@@ -113,7 +113,7 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     random_gen(start);
 
     compute_cpu_generations_on_gpu(start, result_gpu, iterations);//va eseguita necessariamente prima su gpu
-    omp_compute_generations_pow2(start, result_cpu, iterations);
+    omp_compute_generations(start, result_cpu, iterations);
     
     assert(compare_gen(result_cpu, result_gpu));
 

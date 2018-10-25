@@ -96,7 +96,7 @@ void simple(uint32_t rows, uint32_t cols){
         display_gen(s1);
 
         while (!done) {
-            omp_compute_generations_pow2(s1, s2, 1);
+            omp_compute_generations(s1, s2, 1);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
