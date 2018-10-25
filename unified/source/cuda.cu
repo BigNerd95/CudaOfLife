@@ -42,8 +42,8 @@ void gen_d2h(GenStateGpu_p gen_device, GenState_p gen_host){
         cudaError_t err = cudaMemcpy(gen_host->matrix, gen_device->matrix, sizeof(uint8_t)*gen_host->rows * gen_host->cols, cudaMemcpyDeviceToHost);//dest, sorg, size, kind
         
         if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy GenState device to host (error code %s)!\n", cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
+            fprintf(stderr, "Failed to copy GenState device to host (error code %s)!\n", cudaGetErrorString(err));
+            exit(EXIT_FAILURE);
         }
     }
 }
