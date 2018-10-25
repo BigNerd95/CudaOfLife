@@ -1,3 +1,5 @@
+#ifndef __GOL_CUDA__
+#define __GOL_CUDA__
 #include <common.h> 
 
 typedef struct {
@@ -21,3 +23,4 @@ void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t itera
 //void random_gen_gpu(GenStateGpu_p gen);
 //void free_gen_gpu(GenStateGpu_p gen);
 //void game_Gpu(uint32_t rows, uint32_t cols, uint32_t iterations);
+#endif
