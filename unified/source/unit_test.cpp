@@ -113,7 +113,7 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     random_gen(start);
 
     compute_cpu_generations_on_gpu(start, result_gpu, iterations);//va eseguita necessariamente prima su gpu
-    omp_compute_generations_pow2(start, result_cpu, iterations);
+    omp_compute_generations(start, result_cpu, iterations);
     
     assert(compare_gen(result_cpu, result_gpu));
 
@@ -122,8 +122,12 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     free_gen(result_gpu);
 }
 
-/*
-int main(int argc, char *argv[]) {
+
+int unit_testing_main(int argc, char *argv[]) {
+    for (int i=0; i<argc; i++){
+        printf("%s\n", argv[i]);
+    }
+    /*
     srand((unsigned) time(0));
     // Unit test sequential
     check_beehive((&compute_generations_singlefor));
@@ -170,6 +174,6 @@ int main(int argc, char *argv[]) {
     puts("Test big world 2 completato");
     
     puts("Eseguito correttamente");
+    */
     return 0;
 }
-*/

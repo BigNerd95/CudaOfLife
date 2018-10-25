@@ -35,4 +35,5 @@ GenState_p clone_gen(GenState_p src);
 uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2);
 uint8_t isPow2(uint32_t x);
 uint32_t log2pow2(uint32_t x); //peggiora le performance
+
 #endif

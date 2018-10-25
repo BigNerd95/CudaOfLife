@@ -62,7 +62,7 @@ void display_gen(GenState_p gen){
 
     SDL_Rect darea;
     SDL_RenderGetViewport(renderer, &darea);
-    SDL_Rect rect = {0, 0, darea.w/gen->cols, darea.h/gen->rows};
+    SDL_Rect rect = {0, 0, (int32_t) (darea.w/gen->cols), (int32_t) (darea.h/gen->rows)};
     
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
@@ -96,7 +96,7 @@ void simple(uint32_t rows, uint32_t cols){
         display_gen(s1);
 
         while (!done) {
-            omp_compute_generations_pow2(s1, s2, 1);
+            omp_compute_generations(s1, s2, 1);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
@@ -108,8 +108,8 @@ void simple(uint32_t rows, uint32_t cols){
     }
 }
 
-/*
-int main(int argc, char *argv[]) {
+
+int gui_main(int argc, char *argv[]) {
     init_gui();
     srand((unsigned) time(0));
 
@@ -117,4 +117,4 @@ int main(int argc, char *argv[]) {
 
     quit_gui();
     return 0;
-}*/
+}
