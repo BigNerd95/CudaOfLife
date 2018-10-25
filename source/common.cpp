@@ -1,16 +1,5 @@
 #include <common.h> 
 
-/*
-GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
-- usa un solo rederer (non lo distrugge ogni volta)
-- usa un solo rettangolo, lo riposiziona per colorare i pizel
-
-Algo:
-- dimensione righe multipla di 2 per poter usare and al posto del modulo
-
-gcc omp.c -o omp -O2 -D_REENTRANT -lSDL2 -fopenmp && time ./omp
-*/
-
 void print_gen(GenState_p gen){
     printf("r: %d c: %d\n", gen->rows, gen->cols);
 
@@ -76,7 +65,6 @@ uint8_t isPow2(uint32_t x) {
 }
 
 
-//peggiora le performance
 uint32_t log2pow2(uint32_t x){
     uint32_t pow2 = 0;
     while (x >>= 1){

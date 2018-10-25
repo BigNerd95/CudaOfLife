@@ -8,13 +8,9 @@ void check_blinker(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     blinker->matrix[19] = 1;
     blinker->matrix[27] = 1;
     blinker->matrix[35] = 1;
-    //printf("\nPrint blinker state 1\n ");
-    //print_gen(blinker);
-
+    
     (*compute_generation)(blinker, blinker2, 1);
-    //printf("\nPrint blinker state 2 \n");
-    //print_gen(blinker2);
-
+    
     for (int i = 0; i < 64; i++){
         if (i == 26 || i == 27 || i == 28) 
             assert(blinker2->matrix[i] == 1);
@@ -37,12 +33,8 @@ void check_beehive(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     beehive->matrix[29] = 1;
     beehive->matrix[35] = 1;
     beehive->matrix[36] = 1;
-    //printf("\nPrint beehive state 1\n");
-    //print_gen(beehive);
-
+    
     (*compute_generation)(beehive, beehive2, 1);
-    //printf("\nPrint beehive state 2\n");
-    //print_gen(beehive2);
     
     for (int i = 0; i < 64; i++){
         if (i == 19 || i == 20 || i == 26 || i == 29 || i == 35 || i == 36) 
@@ -83,8 +75,7 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     }
 
     (*compute_generation)(glinder, glinder2, 1);
-    //printf("\nPrint glinder state 4\n");
-    //print_gen(glinder2);  
+    
     for (int i = 0; i < 64; i++){
         if (i == 18 || i == 20 || i == 27 || i == 28 || i == 35) 
             assert(glinder2->matrix[i] == 1);
@@ -93,8 +84,7 @@ void check_glinder(void (*compute_generation)(GenState_p s1, GenState_p s2, uint
     }
 
     (*compute_generation)(glinder2, glinder,1);
-    //printf("\nPrint glinder state 1.2\n");
-    //print_gen(glinder);  
+   
     for (int i = 0; i < 64; i++){
         if (i == 20 || i == 26 || i == 28 || i == 35 || i == 36) 
             assert(glinder->matrix[i] == 1);
@@ -112,7 +102,7 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     GenState_p result_gpu = create_gen(rows, cols);
     random_gen(start);
 
-    compute_cpu_generations_on_gpu(start, result_gpu, iterations);//va eseguita necessariamente prima su gpu
+    compute_cpu_generations_on_gpu(start, result_gpu, iterations); //should run it first on gpu
     omp_compute_generations(start, result_cpu, iterations);
     
     assert(compare_gen(result_cpu, result_gpu));
@@ -124,56 +114,55 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
 
 
 int unit_testing_main(int argc, char *argv[]) {
-    for (int i=0; i<argc; i++){
+    /*for (int i=0; i<argc; i++){
         printf("%s\n", argv[i]);
-    }
-    /*
+    }*/
+    
     srand((unsigned) time(0));
-    // Unit test sequential
+    
+    //Unit test sequential
+    puts("Checking sequential functions");
     check_beehive((&compute_generations_singlefor));
     check_blinker((&compute_generations_singlefor));
     check_glinder((&compute_generations_singlefor));
 
+    check_beehive(&compute_generations_doublefor);
+    check_blinker(&compute_generations_doublefor);
+    check_glinder(&compute_generations_doublefor);
+
     check_beehive(&compute_generations);
     check_blinker(&compute_generations);
     check_glinder(&compute_generations);
-
-    check_beehive(&compute_generations_pow2);
-    check_blinker(&compute_generations_pow2);
-    check_glinder(&compute_generations_pow2);
+    puts("All functions works correctly!\n");
 
     // Unit test OpenMp
-    check_beehive((&omp_compute_generations_singlefor));
-    check_blinker((&omp_compute_generations_singlefor));
-    check_glinder((&omp_compute_generations_singlefor));
-
+    puts("Checking OpenMp functions");
     check_beehive(&omp_compute_generations);
     check_blinker(&omp_compute_generations);
     check_glinder(&omp_compute_generations);
-
-    check_beehive(&omp_compute_generations_pow2);
-    check_blinker(&omp_compute_generations_pow2);
-    check_glinder(&omp_compute_generations_pow2);
+    puts("All functions works correctly!\n");
 
     // Unit Test Gpu
+    puts("Checking Cuda functions");
     check_beehive((&compute_cpu_generations_on_gpu));
     check_blinker((&compute_cpu_generations_on_gpu));
     check_glinder((&compute_cpu_generations_on_gpu));
+    puts("All functions works correctly!\n");
     
-    puts("Unit Tests completati");
 
     //Unit Test on Big World
+    puts("Testing Cuda on a medium world");
     check_big_world(64, 64, 1);
     check_big_world(64, 64, 2);
     check_big_world(64, 64, 3);
-    puts("Test big world 1 completato");
+    puts("Test completed!\n");
     
+
+    puts("Testing Cuda on a big world");
     check_big_world(1024, 1024, 1);
     check_big_world(1024, 1024, 2);
     check_big_world(1024, 1024, 3);
-    puts("Test big world 2 completato");
+    puts("Test completed!\n");
     
-    puts("Eseguito correttamente");
-    */
     return 0;
 }

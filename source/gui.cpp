@@ -4,19 +4,6 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 int done;
 
-/*
-void color(int x, int y){
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-    SDL_Rect rect = { x, y, 100, 100};
-    SDL_RenderFillRect(renderer, &rect);
-
-    rect.x = x + 200;
-    SDL_RenderFillRect(renderer, &rect);
-
-    SDL_UpdateWindowSurface(window);
-}
-*/
 
 void clear_all(){
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);

@@ -27,7 +27,8 @@ int benchmark_main(int argc, char *argv[]) {
     srand((unsigned) time(0));
     uint32_t iterations = 1000;
     for (uint32_t world_size = 32; world_size <= 4096; world_size = world_size*2){        
-            printf("(Cpu Pow2) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations)));
+            printf("\nWorld Size: %d \n", world_size);           
+            printf("(Benchmark Cpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations)));
             printf("(Benchmark OpenMp) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&omp_compute_generations)));
             printf("(Benchmark Sequential) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
     }
