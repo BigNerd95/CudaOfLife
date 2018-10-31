@@ -1,8 +1,6 @@
 #ifndef __GOL_BENCHMARK__
 #define __GOL_BENCHMARK__
 
-//#define _POSIX_C_SOURCE 199309L
-
 #include <sequential.h> 
 #include <openmp.h>
 #include <cudax.h>

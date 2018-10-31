@@ -83,7 +83,7 @@ void run_gui(uint32_t rows, uint32_t cols, void (*compute_generation)(GenState_p
         display_gen(s1);
 
         while (!done) {
-            compute_generations(s1, s2, 1);
+            compute_generation(s1, s2, 1);
             swap((void **) &s1, (void **) &s2);
 
             display_gen(s1);
@@ -105,7 +105,7 @@ int gui_main(int argc, char *argv[]) {
         argv++;
         if (!strcmp("seq", *argv)){
             printf("on CPU\n");
-            run_gui(128, 128, compute_generations);
+            run_gui(128, 128, seq_compute_generations);
 
         } else if (!strcmp("omp", *argv)){
             printf("on OMP\n");
@@ -113,13 +113,13 @@ int gui_main(int argc, char *argv[]) {
 
         } else if (!strcmp("cuda", *argv)){
             printf("on CUDA\n");
-            run_gui(128, 128, compute_cpu_generations_on_gpu);
+            run_gui(128, 128, compute_cpu_generations_on_gpu_multidim);
 
         } else {
             printf("Unknown command!\n");
         }
     } else {
-        run_gui(128, 128, compute_generations);
+        run_gui(128, 128, seq_compute_generations);
     }
 
     quit_gui();

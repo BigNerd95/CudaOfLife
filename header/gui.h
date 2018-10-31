@@ -10,8 +10,6 @@
 #define HEIGHT 640
 #define DELAY 50
 
-
-//void color(int x, int y);
 void clear_all();
 void init_gui();
 void quit_gui();

@@ -23,14 +23,20 @@ double get_execution_time(uint32_t rows, uint32_t cols, uint32_t iterations, voi
     return total_time;
 }
 
+void get_execution_time_bidimensional(){
+    printf("(Benchmark Gpu unidimensional) -> %lf\n", get_execution_time(MULTIDIM_R, MULTIDIM_C, 1000, (&compute_cpu_generations_on_gpu)));
+    printf("(Benchmark Gpu bidimensional) -> %lf\n", get_execution_time(MULTIDIM_R, MULTIDIM_C, 1000, (&compute_cpu_generations_on_gpu_multidim)));    
+}
+
 int benchmark_main(int argc, char *argv[]) {
     srand((unsigned) time(0));
     uint32_t iterations = 1000;
-    for (uint32_t world_size = 32; world_size <= 4096; world_size = world_size*2){        
+    get_execution_time_bidimensional();
+    /*for (uint32_t world_size = 32; world_size <= 4096; world_size = world_size*2){        
             printf("\nWorld Size: %d \n", world_size);           
-            printf("(Benchmark Cpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_generations)));
+            printf("(Benchmark Cpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&seq_compute_generations)));
             printf("(Benchmark OpenMp) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&omp_compute_generations)));
             printf("(Benchmark Gpu) -> %lf\n", get_execution_time(world_size, world_size, iterations, (&compute_cpu_generations_on_gpu)));
-    }
+    }*/
     return 0;
 }

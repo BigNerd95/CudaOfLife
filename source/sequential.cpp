@@ -40,7 +40,7 @@ void compute_generations_doublefor(GenState_p s1, GenState_p s2, uint32_t iterat
     }
 }
 
-void compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations){
+void seq_compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations){
     uint32_t rows_m1 = s1->rows - 1;
     uint32_t cols_m1 = s1->cols - 1;
     uint32_t cols_p2 = log2pow2(s1->cols);
@@ -63,4 +63,3 @@ void compute_generations(GenState_p s1, GenState_p s2, uint32_t iterations){
         swap((void **) &s1, (void **) &s2);
     }   
 }
-

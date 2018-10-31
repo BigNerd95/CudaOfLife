@@ -7,22 +7,16 @@
 #include <time.h>
 #include <stdint.h>
 
-/*
-GUI: (https://wiki.libsdl.org/) (http://lazyfoo.net/tutorials/SDL)
-- usa un solo rederer (non lo distrugge ogni volta)
-- usa un solo rettangolo, lo riposiziona per colorare i pizel
 
-Algo:
-- dimensione righe multipla di 2 per poter usare and al posto del modulo
-
-gcc omp.c -o omp -O2 -D_REENTRANT -lSDL2 -fopenmp && time ./omp
-*/
+#define MULTIDIM_R 1024
+#define MULTIDIM_C 1024
 
 typedef struct {
     uint8_t *matrix;
     uint32_t rows;
     uint32_t cols;
 } GenState, *GenState_p;
+
 
 void print_gen(GenState_p gen);
 GenState_p create_gen(uint32_t rows, uint32_t cols);
@@ -34,6 +28,6 @@ uint8_t compare_gen(GenState_p gen1, GenState_p gen2);
 GenState_p clone_gen(GenState_p src);
 uint8_t countAliveCells(uint8_t *matrix, uint32_t x0, uint32_t x1, uint32_t x2, uint32_t y0, uint32_t y1, uint32_t y2);
 uint8_t isPow2(uint32_t x);
-uint32_t log2pow2(uint32_t x); //peggiora le performance
+uint32_t log2pow2(uint32_t x);
 
 #endif

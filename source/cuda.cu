@@ -1,6 +1,6 @@
 #include <cudax.h>
 
-#define MAX_CELL_PER_THREAD 2
+#define MAX_CELL_PER_THREAD 1
 
 GenStateGpu_p create_gen_gpu(uint32_t rows, uint32_t cols){
     uint32_t size = rows * cols * sizeof(uint8_t);
@@ -101,64 +101,139 @@ __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *m
     } 
 }
 
-/**
- * 3) Kernel device routine
- */
- __global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t cellPerThreads) {
-    uint32_t start = (blockIdx.x*blockDim.x + threadIdx.x) * cellPerThreads;
-    uint32_t end =  cellPerThreads + start;
+/*
+Kenel 4 con 1 cell per threads
+*/
+__global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols) {
+    uint32_t cell = blockIdx.x*blockDim.x + threadIdx.x;
+    //int row = blockIdx.y * blockDim.y + threadIdx.y;
+    //int col = blockIdx.x * blockDim.x + threadIdx.x; 
 
-    for (uint32_t cell = start; cell < end; cell++){
-        uint32_t x1 = cell     & cols-1; //% cols;
-        uint32_t x0 = (x1 - 1) & cols-1; //% cols;
-        uint32_t x2 = (x1 + 1) & cols-1; //% cols;
+    uint32_t x1 = cell     & cols-1; //% cols;
+    uint32_t x0 = (x1 - 1) & cols-1; //% cols;
+    uint32_t x2 = (x1 + 1) & cols-1; //% cols;
 
-        uint32_t y1 = cell - x1;
-        uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
-        uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
+    uint32_t y1 = cell - x1;
+    uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
+    uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
 
-        uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
-                                matrix_src[x2 + y1] + matrix_src[x0 + y2] + matrix_src[x1 + y2] + matrix_src[x2 + y2];
+    uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
+                            matrix_src[x2 + y1] + matrix_src[x0 + y2] + matrix_src[x1 + y2] + matrix_src[x2 + y2];
+
+    matrix_dst[y1 + x1] = (aliveCells == 3 || (aliveCells == 2 && matrix_src[y1 + x1])) ? 1 : 0;      
+}
+
+/*
+Kenel 4,5 matrice multidimensionale
+*/
+__global__ void kernel_compute_gen_multiblocks_multidim(uint8_t *matrix_src, uint8_t *matrix_dst) {
+    uint8_t (*msrc)[MULTIDIM_R][MULTIDIM_C] = (uint8_t (*)[MULTIDIM_R][MULTIDIM_C]) matrix_src; 
+    uint8_t (*mdst)[MULTIDIM_R][MULTIDIM_C] = (uint8_t (*)[MULTIDIM_R][MULTIDIM_C]) matrix_dst;
+
+    uint32_t row = blockIdx.x * blockDim.x + threadIdx.x; 
+    uint32_t col = blockIdx.y * blockDim.y + threadIdx.y; 
     
-        matrix_dst[y1 + x1] = (aliveCells == 3 || (aliveCells == 2 && matrix_src[y1 + x1])) ? 1 : 0; 
-    }     
+    uint8_t aliveCells =  (*msrc)[(row - 1) & MULTIDIM_R-1][(col - 1) & MULTIDIM_C-1];     
+            aliveCells += (*msrc)[ row]                    [(col - 1) & MULTIDIM_C-1]; 
+            aliveCells += (*msrc)[(row + 1) & MULTIDIM_R-1][(col - 1) & MULTIDIM_C-1];
+            
+            aliveCells += (*msrc)[(row - 1) & MULTIDIM_R-1][col]; 
+            aliveCells += (*msrc)[(row + 1) & MULTIDIM_R-1][col]; 
+            
+            aliveCells += (*msrc)[(row - 1) & MULTIDIM_R-1][(col + 1) & MULTIDIM_C-1]; 
+            aliveCells += (*msrc)[ row]                    [(col + 1) & MULTIDIM_C-1]; 
+            aliveCells += (*msrc)[(row + 1) & MULTIDIM_R-1][(col + 1) & MULTIDIM_C-1];
+
+    
+    (*mdst)[row][col] = (aliveCells == 3 || (aliveCells == 2 && (*msrc)[row][col])) ? 1 : 0;
+}
+
+
+/*
+Kenel 5 SHARED
+*
+__global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols) {
+    
+    uint32_t row = blockIdx.y * blockDim.y + threadIdx.y;
+    uint32_t col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    __shared__ uint8_t matrix_block[128][128]
+    matrix_block[row][cols] =  *matrix_src[row][cols];
+    matrix_block[(row+1)& cols-1][cols] =  *matrix_src[row][cols];
+    
+    uint32_t cell = blockIdx.x*blockDim.x + threadIdx.x;
+
+    uint32_t x1 = cell     & cols-1; //% cols;
+    uint32_t x0 = (x1 - 1) & cols-1; //% cols;
+    uint32_t x2 = (x1 + 1) & cols-1; //% cols;
+
+    uint32_t y1 = cell - x1;
+    uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
+    uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
+
+    //uint8_t aliveCells = matrix_src[x0 + y0] + matrix_src[x1 + y0] + matrix_src[x2 + y0] + matrix_src[x0 + y1] +
+    //                        matrix_src[x2 + y1] + matrix_src[x0 + y2] + matrix_src[x1 + y2] + matrix_src[x2 + y2];
+
+    matrix_dst[y1 + x1] = (aliveCells == 3 || (aliveCells == 2 && matrix_src[y1 + x1])) ? 1 : 0;      
+}*/
+
+int getMultiprocessorCores(cudaDeviceProp devProp){  
+    int cores = 0;
+    switch (devProp.major){
+        case 2: // Fermi
+            if (devProp.minor == 1) cores = 48;
+            else cores = 32;
+        break;
+        case 3: // Kepler
+            cores = 192;
+        break;
+        case 5: // Maxwell
+            cores = 128;
+        break;
+        case 6: // Pascal
+            if (devProp.minor == 1) cores = 128;
+            else if (devProp.minor == 0) cores = 64;
+            else printf("Unknown device type\n");
+        break;
+        case 7: // Volta
+            if (devProp.minor == 0) cores = 64;
+            else printf("Unknown device type\n");
+        break;
+        default:
+            printf("Unknown device type\n"); 
+        break;
+    }
+    return cores;
 }
 
 uint32_t getDeviceInfo(){
-    int deviceCount = 0;
+    uint16_t deviceCount = 0;
     cudaSetDevice(deviceCount);
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, deviceCount);
-    return deviceProp.maxThreadsPerBlock;
+    uint32_t threadPerBlock = deviceProp.maxThreadsPerBlock;
+    uint32_t multiprocessorCores = getMultiprocessorCores(deviceProp); 
+    return (threadPerBlock <= multiprocessorCores) ? threadPerBlock : multiprocessorCores;  
 }
 
+
+ 
 void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations){
     // Load gpu info for optimal load balancing   
     uint32_t dim_world = s1->rows * s1->cols;
     uint32_t threadsPerBlock = getDeviceInfo();
-    
+
+    uint32_t totalBlocks = dim_world / threadsPerBlock;//the number of blocks will always be a positive power of two 
     if (dim_world <= threadsPerBlock){
-        //printf("\n1 if\n");
         kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix,  dim_world-1, s1->cols, iterations);//num_block, dim_block,  
     } else {
-
-        uint32_t cellPerThreads = dim_world / threadsPerBlock; 
-        if (cellPerThreads <= MAX_CELL_PER_THREAD){ 
-            //printf("\n2 if\n");
-            kernel_compute_gen_singleblock<<<1, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols, iterations, cellPerThreads);//num_block, dim_block,          
-        } else {//if there are too cells per thread we use more blocks to spread the works
-            
-            //printf("\n3 if\n");
-            uint32_t totalBlocks = cellPerThreads / MAX_CELL_PER_THREAD;//the number of blocks will always be a positive power of two 
-            uint32_t dim_m1 = dim_world-1;
-            for (uint32_t iter = 0; iter< iterations; iter++){
-                kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_m1, s1->cols, MAX_CELL_PER_THREAD);//num_block, dim_block,          
-                swap((void **) &s1, (void **) &s2);  
-            }
+        for (uint32_t iter = 0; iter< iterations; iter++){
+            kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);//num_block, dim_block,          
+            swap((void **) &s1, (void **) &s2);  
         }
-    }
+    }    
 }
- 
+
 void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
@@ -172,4 +247,33 @@ void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t itera
 }
 
 
+void compute_generation_on_gpu_multidim(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations){
+    // Load gpu info for optimal load balancing   
+    uint32_t dim_world = s1->cols * s1->rows;
+    uint32_t threadsPerBlock = getDeviceInfo();
 
+    uint32_t totalBlocks = dim_world / threadsPerBlock;//the number of blocks will always be a positive power of two 
+    if (dim_world <= threadsPerBlock){
+        kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix,  dim_world-1, s1->cols, iterations);//num_block, dim_block,  
+    } else {
+        //printf("totalBlocks: %d\n",totalBlocks);
+        dim3 dimBlock(16, 8);
+        dim3 dimGrid(s1->cols/16, s1->rows/8);
+        for (uint32_t iter = 0; iter< iterations; iter++){
+            kernel_compute_gen_multiblocks_multidim<<<dimGrid, dimBlock>>>(s1->matrix, s2->matrix);//num_block, dim_block,          
+            swap((void **) &s1, (void **) &s2);  
+        }
+    }    
+}
+
+void compute_cpu_generations_on_gpu_multidim(GenState_p s1, GenState_p s2, uint32_t iterations){
+    GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
+    GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
+
+    gen_h2d(s1, gen_device_1);
+    compute_generation_on_gpu_multidim(gen_device_1, gen_device_2, iterations);
+    gen_d2h(gen_device_2, s2);
+    
+    free_gen_gpu(gen_device_1);
+    free_gen_gpu(gen_device_2);
+}

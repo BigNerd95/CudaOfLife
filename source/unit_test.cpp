@@ -113,12 +113,31 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
 }
 
 
+
+
+void check_multidimension(uint32_t rows, uint32_t cols, uint32_t iterations){
+    GenState_p start = create_gen(rows, cols);
+    GenState_p result_cpu = create_gen(rows, cols);
+    GenState_p result_gpu = create_gen(rows, cols);
+    random_gen(start);
+
+    compute_cpu_generations_on_gpu_multidim(start, result_gpu, iterations); //should run it first on gpu
+    omp_compute_generations(start, result_cpu, iterations);
+    
+    assert(compare_gen(result_cpu, result_gpu));
+
+    free_gen(start);
+    free_gen(result_cpu);
+    free_gen(result_gpu);
+}
+    
 int unit_testing_main(int argc, char *argv[]) {
     /*for (int i=0; i<argc; i++){
         printf("%s\n", argv[i]);
     }*/
     
     srand((unsigned) time(0));
+    
     
     //Unit test sequential
     puts("Checking sequential functions");
@@ -130,9 +149,9 @@ int unit_testing_main(int argc, char *argv[]) {
     check_blinker(&compute_generations_doublefor);
     check_glinder(&compute_generations_doublefor);
 
-    check_beehive(&compute_generations);
-    check_blinker(&compute_generations);
-    check_glinder(&compute_generations);
+    check_beehive(&seq_compute_generations);
+    check_blinker(&seq_compute_generations);
+    check_glinder(&seq_compute_generations);
     puts("All functions works correctly!\n");
 
     // Unit test OpenMp
@@ -162,6 +181,10 @@ int unit_testing_main(int argc, char *argv[]) {
     check_big_world(1024, 1024, 1);
     check_big_world(1024, 1024, 2);
     check_big_world(1024, 1024, 3);
+    puts("Test completed!\n");
+
+    puts("Testing Cuda on a multidimension matrix");
+    check_multidimension(MULTIDIM_R, MULTIDIM_C, 1); 
     puts("Test completed!\n");
     
     return 0;
