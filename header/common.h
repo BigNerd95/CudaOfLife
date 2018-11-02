@@ -8,8 +8,8 @@
 #include <stdint.h>
 
 
-#define MULTIDIM_R 1024
-#define MULTIDIM_C 1024
+#define MULTIDIM_R 4096
+#define MULTIDIM_C 4096
 
 typedef struct {
     uint8_t *matrix;

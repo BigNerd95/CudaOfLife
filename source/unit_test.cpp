@@ -102,7 +102,7 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     GenState_p result_gpu = create_gen(rows, cols);
     random_gen(start);
 
-    compute_cpu_generations_on_gpu(start, result_gpu, iterations); //should run it first on gpu
+    compute_cpu_generations_on_gpu_shared(start, result_gpu, iterations); //should run it first on gpu
     omp_compute_generations(start, result_cpu, iterations);
     
     assert(compare_gen(result_cpu, result_gpu));
@@ -111,9 +111,6 @@ void check_big_world(uint32_t rows, uint32_t cols, uint32_t iterations){
     free_gen(result_cpu);
     free_gen(result_gpu);
 }
-
-
-
 
 void check_multidimension(uint32_t rows, uint32_t cols, uint32_t iterations){
     GenState_p start = create_gen(rows, cols);
@@ -169,7 +166,7 @@ int unit_testing_main(int argc, char *argv[]) {
     puts("All functions works correctly!\n");
     
 
-    //Unit Test on Big World
+    //Unit Test on Medium World
     puts("Testing Cuda on a medium world");
     check_big_world(64, 64, 1);
     check_big_world(64, 64, 2);
@@ -178,9 +175,9 @@ int unit_testing_main(int argc, char *argv[]) {
     
 
     puts("Testing Cuda on a big world");
-    check_big_world(1024, 1024, 1);
-    check_big_world(1024, 1024, 2);
-    check_big_world(1024, 1024, 3);
+    check_big_world(128, 128, 1);
+    //check_big_world(1024, 1024, 2);
+    //check_big_world(1024, 1024, 3);
     puts("Test completed!\n");
 
     puts("Testing Cuda on a multidimension matrix");

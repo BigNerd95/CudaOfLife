@@ -12,6 +12,7 @@ typedef struct {
 void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations);
 
 void compute_cpu_generations_on_gpu_multidim(GenState_p s1, GenState_p s2, uint32_t iterations);
+void compute_cpu_generations_on_gpu_shared(GenState_p s1, GenState_p s2, uint32_t iterations);
 
 
 #endif
