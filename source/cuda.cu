@@ -208,47 +208,42 @@ __global__ void kernel_compute_gen_shared(uint8_t *matrix_src, uint8_t *matrix_d
 /*
 Kernel 6 final fantasy 
 */
-__global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols) {
-    extern __shared__ uint8_t shared[];
-    uint32_t cell = blockIdx.x*blockDim.x + threadIdx.x;// + ((threadIdx.y - 1) * cols));// & dim_m1;
-    
-    
-    uint32_t x1 = cell & cols-1; //modlulo mondo esterno
-    uint32_t y1 = (cell - x1) & dim_m1;
 
-    if (threadIdx.x == 0 && blockIdx.x == 2){
-        printf("\nx1: %d", x1);
-        printf("\ny1: %d", y1);    
-    }
-    //uint32_t x0 = (x1 - 1) & cols-1; //% cols;
-    //uint32_t x2 = (x1 + 1) & cols-1; //% cols;
-    //uint32_t y0 = (y1 - cols) & dim_m1; //% dim;
-    //uint32_t y2 = (y1 + cols) & dim_m1; //% dim;
-    
 
-    shared[threadIdx.x] = matrix_src[x1 + y1];
+__global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows_m1, uint32_t cols_m1) {
+    //extern __shared__ uint8_t shared[];
+    __shared__ int shared[3][128 + 2];
+
+    int ix = threadIdx.x & (cols_m1); //(blockDim.x - 2) * blockIdx.x + threadIdx.x;
+    int iy = (blockIdx.x + threadIdx.y) & (rows_m1);
+    int id = iy * (blockDim.x-2) + ix;
+
+    int i = threadIdx.y;
+    int j = threadIdx.x;
+
+    uint8_t mine = matrix_src[id];
+    shared[i][j] = mine;
+    //shared[i][j] = matrix_src[id];
+
+    //if (i==2 && j==129)
+    //    printf("%d\n", threadIdx.y);
     
     __syncthreads();
 
-    //if (threadIdx.x == 0 && blockIdx.x > 8000)
-      //  printf("blockid.x: %d\n", blockIdx.x);
+    if (i == 1 && j > 0 && j < 129){
 
-    if (threadIdx.x - 131 < 128){
-        uint32_t scell = threadIdx.x;
-        //if (threadIdx.x == 259)
-          //  printf("Block dim: %d\n", blockDim.x);
+        uint8_t aliveCells = shared[i + 1][j] +  // lower
+                             shared[i - 1][j] +  // upper
+                             shared[i][j + 1] +  // right
+                             shared[i][j - 1] +  // left
+                             shared[i + 1][j + 1] + 
+                             shared[i - 1][j - 1] +  //diagonals
+                             shared[i - 1][j + 1] + 
+                             shared[i + 1][j - 1];
 
-        uint8_t aliveCells = shared[scell - 128 - 3] + //sx0 + sy0 
-                             shared[scell - 128 - 2] + //sx1 + sy0
-                             shared[scell - 128 - 1] + //sx2 + sy0 
-                             shared[scell - 1] + //sx0 + sy1
-                             shared[scell + 1] + //sx2 + sy1
-                             shared[scell + 128 + 3] + //sx0 + sy2 
-                             shared[scell + 128 + 2] + //sx1 + sy2 
-                             shared[scell + 128 + 1]; //sx2 + sy2
+        matrix_dst[id] = (aliveCells == 3 || (aliveCells == 2 && mine)) ? 1 : 0;
 
-        
-        matrix_dst[x1 + y1] = (aliveCells == 3 || (aliveCells == 2 && shared[scell])) ? 1 : 0;
+        //matrix_dst[id] = (aliveCells == 3 || (aliveCells == 2 && shared[i][j])) ? 1 : 0;
     }          
 }
 
@@ -522,9 +517,10 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
         if (s1->cols >= threadsPerBlock){
             for (uint32_t iter = 0; iter< iterations; iter++){
                 //kernel_compute_gen_shared<<<totalBlocks, threadsPerBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);
-                //dim3 dimBlock(threadsPerBlock + 2, 3);
-                int dimBlock = 390;
-                kernel_compute_gen_last_shared<<<totalBlocks, dimBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);//num_block, dim_block,          
+                dim3 dimBlock(threadsPerBlock + 2, 3);
+                //int dimBlock = 128 * 3 + 2;
+                kernel_compute_gen_last_shared<<<totalBlocks, dimBlock>>>(s1->matrix, s2->matrix, s1->rows-1, s1->cols-1);//num_block, dim_block,          
+                //kernel_compute_gen_last_shared<<<totalBlocks, dimBlock, sizeof(uint8_t)*((threadsPerBlock + 2) * 3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);  
             }
         } else {
