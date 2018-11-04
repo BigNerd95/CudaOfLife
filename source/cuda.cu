@@ -210,13 +210,13 @@ Kernel 6 final fantasy
 */
 
 
-__global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows_m1, uint32_t cols_m1) {
+__global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols) {
     //extern __shared__ uint8_t shared[];
     __shared__ int shared[3][128 + 2];
 
-    int ix = threadIdx.x & (cols_m1); //(blockDim.x - 2) * blockIdx.x + threadIdx.x;
-    int iy = (blockIdx.x + threadIdx.y) & (rows_m1);
-    int id = iy * (blockDim.x-2) + ix;
+    int ix = ((blockDim.x - 2) * blockIdx.x + threadIdx.x) & (cols - 1);
+    int iy = (blockIdx.y + threadIdx.y) & (rows - 1);
+    int id = iy * cols + ix;
 
     int i = threadIdx.y;
     int j = threadIdx.x;
@@ -518,8 +518,9 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
             for (uint32_t iter = 0; iter< iterations; iter++){
                 //kernel_compute_gen_shared<<<totalBlocks, threadsPerBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);
                 dim3 dimBlock(threadsPerBlock + 2, 3);
+                dim3 dimGrid(s1->cols/threadsPerBlock, s1->rows);
                 //int dimBlock = 128 * 3 + 2;
-                kernel_compute_gen_last_shared<<<totalBlocks, dimBlock>>>(s1->matrix, s2->matrix, s1->rows-1, s1->cols-1);//num_block, dim_block,          
+                kernel_compute_gen_last_shared<<<dimGrid, dimBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols);//num_block, dim_block,          
                 //kernel_compute_gen_last_shared<<<totalBlocks, dimBlock, sizeof(uint8_t)*((threadsPerBlock + 2) * 3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);  
             }
