@@ -33,13 +33,13 @@ void get_execution_time_shared(){
     //printf("(Benchmark Gpu normale) -> %lf\n", get_execution_time(4096, 4096, 1000, (&compute_cpu_generations_on_gpu)));
     //printf("(Benchmark Gpu shared) -> %lf\n", get_execution_time(4096, 4096, 1000, (&compute_cpu_generations_on_gpu_shared)));  
       
-    printf("(Benchmark Gpu normale) -> %lf\n", get_execution_time(128, 128, 1000, (&compute_cpu_generations_on_gpu)));
-    printf("(Benchmark Gpu shared)  -> %lf\n", get_execution_time(128, 128, 1000, (&compute_cpu_generations_on_gpu_shared)));    
+    //printf("(Benchmark Gpu normale) -> %lf\n", get_execution_time(128, 128, 1000, (&compute_cpu_generations_on_gpu)));
+    //printf("(Benchmark Gpu shared)  -> %lf\n", get_execution_time(128, 128, 1000, (&compute_cpu_generations_on_gpu_shared)));    
 
-    /*for (uint32_t world_size = 128; world_size <= 4096; world_size = world_size*2){        
+    for (uint32_t world_size = 128; world_size <= 4096; world_size = world_size*2){        
         printf("(Benchmark Gpu normale) %d -> %lf\n", world_size, get_execution_time(world_size, world_size, 1000, (&compute_cpu_generations_on_gpu)));
         printf("(Benchmark Gpu shared)  %d -> %lf\n", world_size, get_execution_time(world_size, world_size, 1000, (&compute_cpu_generations_on_gpu_shared)));  
-    }*/
+    }
 }
 
 
