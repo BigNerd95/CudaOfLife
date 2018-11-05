@@ -175,10 +175,8 @@ int unit_testing_main(int argc, char *argv[]) {
     
 
     puts("Testing Cuda on a big world");
-    check_big_world(128, 128, 1);
+    check_big_world(128, 128, 2);
     check_big_world(1024, 1024, 2);
-    //check_big_world(1024, 1024, 2);
-    //check_big_world(1024, 1024, 3);
     puts("Test completed!\n");
 
     puts("Testing Cuda on a multidimension matrix");
