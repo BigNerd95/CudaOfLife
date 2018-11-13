@@ -352,11 +352,12 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
         kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix,  dim_world-1, s1->cols, iterations);//num_block, dim_block,  
     } else {
         if (s1->cols >= threadsPerBlock){
+            cudaDeviceSetCacheConfig(cudaFuncCachePreferL1);
             for (uint32_t iter = 0; iter< iterations; iter++){
-                kernel_compute_gen_shared<<<totalBlocks, threadsPerBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);
-                //dim3 dimBlock(threadsPerBlock + 2, 3);
-                //dim3 dimGrid(s1->cols/threadsPerBlock, s1->rows);
-                //kernel_compute_gen_last_shared<<<dimGrid, dimBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols);//num_block, dim_block,          
+                //kernel_compute_gen_shared<<<totalBlocks, threadsPerBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);
+                dim3 dimBlock(threadsPerBlock + 2, 3);
+                dim3 dimGrid(s1->cols/threadsPerBlock, s1->rows);
+                kernel_compute_gen_last_shared<<<dimGrid, dimBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);  
             }
         } else {
