@@ -221,7 +221,7 @@ __global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *mat
     int i = threadIdx.y;
     int j = threadIdx.x;
 
-    uint8_t mine = matrix_src[id];
+    uint8_t mine = matrix_src[id]; // keep cell in register
     shared[i][j] = mine;
     //shared[i][j] = matrix_src[id];
 
