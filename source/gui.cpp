@@ -113,7 +113,7 @@ int gui_main(int argc, char *argv[]) {
 
         } else if (!strcmp("cuda", *argv)){
             printf("on CUDA\n");
-            run_gui(128, 128, compute_cpu_generations_on_gpu_multidim);
+            run_gui(128, 128, compute_cpu_generations_on_gpu);
 
         } else {
             printf("Unknown command!\n");
