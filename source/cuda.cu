@@ -308,6 +308,7 @@ void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t itera
 }
 
 
+// Richiama il kernel piu' corretto in base alla dimensione del mondo
 void compute_generation_on_gpu_multidim(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations){
     // Load gpu info for optimal load balancing   
     uint32_t dim_world = s1->cols * s1->rows;
@@ -326,6 +327,7 @@ void compute_generation_on_gpu_multidim(GenStateGpu_p s1, GenStateGpu_p s2, uint
     }    
 }
 
+// funzione di appoggio
 void compute_cpu_generations_on_gpu_multidim(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
@@ -339,7 +341,7 @@ void compute_cpu_generations_on_gpu_multidim(GenState_p s1, GenState_p s2, uint3
 }
 
 
-
+// Richiama il kernel piu' corretto in base alla dimensione del mondo
 void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations){
     // Load gpu info for optimal load balancing   
     uint32_t dim_world = s1->rows * s1->cols;
@@ -350,7 +352,7 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
         kernel_compute_gen_singleblock_1<<<1, dim_world>>>(s1->matrix, s2->matrix,  dim_world-1, s1->cols, iterations);//num_block, dim_block,  
     } else {
         if (s1->cols >= threadsPerBlock){
-            cudaDeviceSetCacheConfig(cudaFuncCachePreferL1);
+            cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
             for (uint32_t iter = 0; iter< iterations; iter++){
                 //kernel_compute_gen_shared<<<totalBlocks, threadsPerBlock, sizeof(uint8_t)*((threadsPerBlock+2)*3)>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);
                 dim3 dimBlock(threadsPerBlock + 2, 3);
@@ -358,7 +360,7 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
                 kernel_compute_gen_last_shared<<<dimGrid, dimBlock>>>(s1->matrix, s2->matrix, s1->rows, s1->cols);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);  
             }
-        } else {
+        } else { // per tutti i casi in cui le colonne NON sono multiple del numero di core per SMP (dato che vengono usati slice di questa dimensione) 
             for (uint32_t iter = 0; iter< iterations; iter++){                
                 kernel_compute_gen_multiblocks<<<totalBlocks, threadsPerBlock>>>(s1->matrix, s2->matrix, dim_world-1, s1->cols);//num_block, dim_block,          
                 swap((void **) &s1, (void **) &s2);  
@@ -366,6 +368,8 @@ void compute_generation_on_gpu_shared(GenStateGpu_p s1, GenStateGpu_p s2, uint32
         }
     }    
 }
+
+// funzione di appoggio
 
 void compute_cpu_generations_on_gpu_shared(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
