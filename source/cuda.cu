@@ -51,7 +51,7 @@ __device__ void gpu_swap(void **a, void **b) {
 }
 
 /**
- * 1) Kernel device routine
+ * Kernel 1: Tutto il mondo in un solo blocco con 1 cella per thread
  */
 __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t iterations) {
     uint32_t cell = threadIdx.x;
@@ -74,7 +74,7 @@ __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *m
 }
 
 /**
- * 2) Kernel device routine
+ * Kernel 2: Tutto il mondo in un solo blocco con piu' celle per thread
  */
  __global__ void kernel_compute_gen_singleblock(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols, uint32_t iterations, uint32_t cellPerThreads) {
     uint32_t start = threadIdx.x * cellPerThreads;
@@ -102,7 +102,7 @@ __global__ void kernel_compute_gen_singleblock_1(uint8_t *matrix_src, uint8_t *m
 }
 
 /*
-Kenel 4 con 1 cell per threads
+*  kernel 3: Il mondo su piu' blocchi con una cella per thread 
 */
 __global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols) {
     uint32_t cell = blockIdx.x*blockDim.x + threadIdx.x;
@@ -124,7 +124,7 @@ __global__ void kernel_compute_gen_multiblocks(uint8_t *matrix_src, uint8_t *mat
 }
 
 /*
-Kenel 4,5 matrice multidimensionale
+*  kernel 3,5: Il mondo su piu' blocchi, acceduto come matrice, con una cella per thread 
 */
 __global__ void kernel_compute_gen_multiblocks_multidim(uint8_t *matrix_src, uint8_t *matrix_dst) {
     uint8_t (*msrc)[MULTIDIM_R][MULTIDIM_C] = (uint8_t (*)[MULTIDIM_R][MULTIDIM_C]) matrix_src; 
@@ -149,7 +149,8 @@ __global__ void kernel_compute_gen_multiblocks_multidim(uint8_t *matrix_src, uin
 }
 
 /*
-Kenel 5 SHARED
+*  kernel 4: Il mondo su piu' blocchi con una cella per thread e shared memory dinamica. 
+*            Numero di thread uguale al numero di celle del mondo, con piu' copie per thread
 */
 __global__ void kernel_compute_gen_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t dim_m1, uint32_t cols) {
     extern __shared__ uint8_t shared[];
@@ -199,12 +200,10 @@ __global__ void kernel_compute_gen_shared(uint8_t *matrix_src, uint8_t *matrix_d
 
 
 /*
-Kernel 6 Optimazed Shared Memory
+*  kernel 5: Il mondo su piu' blocchi con una cella per thread e shared memory statica (per accederla come matrice). 
+*            Numero di thread maggiore del numero di celle del mondo, per effettuare solo una copia per thread
 */
-
-
 __global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *matrix_dst,  uint32_t rows, uint32_t cols) {
-    //extern __shared__ uint8_t shared[];
     __shared__ int shared[3][128 + 2];
 
     int ix = ((blockDim.x - 2) * blockIdx.x + threadIdx.x) & (cols - 1);
@@ -217,10 +216,7 @@ __global__ void kernel_compute_gen_last_shared(uint8_t *matrix_src, uint8_t *mat
     uint8_t mine = matrix_src[id]; // keep cell in register
     shared[i][j] = mine;
     //shared[i][j] = matrix_src[id];
-
-    //if (i==2 && j==129)
-    //    printf("%d\n", threadIdx.y);
-    
+ 
     __syncthreads();
 
     if (i == 1 && j > 0 && j < 129){
@@ -269,6 +265,7 @@ int getMultiprocessorCores(cudaDeviceProp devProp){
     return cores;
 }
 
+// Restutuisce il max tra numero di core per stream multiprocessor e numero di thread massimi per blocco
 uint32_t getDeviceInfo(){
     uint16_t deviceCount = 0;
     cudaSetDevice(deviceCount);
@@ -280,7 +277,7 @@ uint32_t getDeviceInfo(){
 }
 
 
- 
+// Richiama il kernel piu' corretto in base alla dimensione del mondo
 void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iterations){
     // Load gpu info for optimal load balancing   
     uint32_t dim_world = s1->rows * s1->cols;
@@ -297,6 +294,7 @@ void compute_generation_on_gpu(GenStateGpu_p s1, GenStateGpu_p s2, uint32_t iter
     }    
 }
 
+// funzione di appoggio
 void compute_cpu_generations_on_gpu(GenState_p s1, GenState_p s2, uint32_t iterations){
     GenStateGpu_p gen_device_1 = create_gen_gpu(s1->rows, s1->cols);
     GenStateGpu_p gen_device_2 = create_gen_gpu(s1->rows, s1->cols);
